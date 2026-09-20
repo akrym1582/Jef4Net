@@ -16,21 +16,45 @@ internal static class MappingGenerator
             var encode = new SortedDictionary<ulong, int>();
             var records = new HashSet<string>();
             var encodeOptions = new Dictionary<ulong, HashSet<string>>();
+            ulong[]? roundtripDecode = size == 65536 ? new ulong[size] : null;
+            var roundtripEncode = new SortedDictionary<ulong, int>();
+            ulong[]? hanyoDecode = size == 65536 ? new ulong[size] : null;
+            var hanyoEncode = new SortedDictionary<ulong, int>();
             foreach (var r in doc.RootElement.EnumerateArray())
             {
                 int code = Hex(r.GetProperty("code"));
                 if (code < 0 || code >= size) throw new InvalidDataException("Code out of range.");
                 int scalar = Scalar(r.GetProperty("unicode"));
                 int suffix = r.TryGetProperty("sp", out var sp) ? Scalar(sp) : 0;
-                foreach (var field in new[] { "hd", "aj1" })
-                    if (r.TryGetProperty(field, out var v)) Scalar(v);
+                bool hasHd = r.TryGetProperty("hd", out var hdValue);
+                int hdSuffix = hasHd ? Scalar(hdValue) : 0;
+                bool hasAj1 = r.TryGetProperty("aj1", out var ajValue);
+                if (hasAj1) Scalar(ajValue);
+                if (r.TryGetProperty("sp", out _) && hasHd) throw new InvalidDataException("More than two Unicode scalars in a mapping.");
                 var options = r.GetProperty("options").EnumerateArray().Select(v => v.GetString()!).ToHashSet();
                 string[] allowed = ["oneway", "decode_only", "encode_only", "unmappable", "cjk_ci", "substitution", "variant_only", "compatible"];
                 if (options.Except(allowed).Any() || (options.Contains("decode_only") && options.Contains("encode_only")))
                     throw new InvalidDataException("Unknown or conflicting options.");
                 string identity = $"{code}:{scalar}:{suffix}:{(r.TryGetProperty("hd", out var hd) ? hd.GetString() : "")}:{(r.TryGetProperty("aj1", out var aj) ? aj.GetString() : "")}";
                 if (!records.Add(identity)) throw new InvalidDataException($"Duplicate record: {identity}");
-                if (r.TryGetProperty("hd", out _) || r.TryGetProperty("aj1", out _) || options.Contains("unmappable")) continue;
+                if (size == 65536 && !hasAj1 && !options.Contains("unmappable"))
+                {
+                    // The upstream HanyoDenshi encoder accepts a bare alias unless it is variant_only.
+                    ulong bareKey = ((ulong)(scalar + 1) << 21) | (uint)suffix;
+                    ulong ivsKey = ((ulong)(scalar + 1) << 21) | (uint)(hasHd ? hdSuffix : suffix);
+                    if (!options.Contains("encode_only")) hanyoDecode![code] = ivsKey;
+                    if (!options.Contains("decode_only"))
+                    {
+                        if (!options.Contains("variant_only")) hanyoEncode[bareKey] = code;
+                        hanyoEncode[ivsKey] = code;
+                    }
+                    if (!hasHd && !options.Contains("oneway"))
+                    {
+                        if (!options.Contains("encode_only")) roundtripDecode![code] = bareKey;
+                        if (!options.Contains("decode_only")) roundtripEncode[bareKey] = code;
+                    }
+                }
+                if (hasHd || hasAj1 || options.Contains("unmappable")) continue;
                 // Scalar+1 reserves zero for undefined entries, including U+0000.
                 ulong key = ((ulong)(scalar + 1) << 21) | (uint)suffix;
                 if (!options.Contains("encode_only"))
@@ -49,16 +73,23 @@ internal static class MappingGenerator
             }
             if (size == 65536)
             {
-                var entries = decode.Distinct().OrderBy(v => v).ToArray();
-                if (entries.Length > ushort.MaxValue) throw new InvalidDataException("Too many mapping entries.");
-                var ids = entries.Select((value, index) => (value, index)).ToDictionary(v => v.value, v => v.index);
-                Emit(name + "Ids", "ushort", decode.Select(v => ids[v].ToString(CultureInfo.InvariantCulture)));
-                Emit(name + "Entries", "ulong", entries.Select(v => v.ToString(CultureInfo.InvariantCulture) + "UL"));
+                EmitJefDecode(name, decode);
+                // A pair is roundtrippable only when both selected directions agree.
+                for (int code = 0; code < roundtripDecode!.Length; code++)
+                {
+                    ulong key = roundtripDecode[code];
+                    if (key == 0 || !roundtripEncode.TryGetValue(key, out int selected) || selected != code)
+                        roundtripDecode[code] = 0;
+                }
+                foreach (ulong key in roundtripEncode.Keys.ToArray())
+                    if (roundtripDecode[roundtripEncode[key]] != key) roundtripEncode.Remove(key);
+                EmitJefDecode("JefRoundtrip", roundtripDecode);
+                EmitEncode("JefRoundtrip", roundtripEncode);
+                EmitJefDecode("JefHanyo", hanyoDecode!);
+                EmitEncode("JefHanyo", hanyoEncode);
             }
             else Emit(name + "Decode", "ulong", decode.Select(v => v.ToString(CultureInfo.InvariantCulture) + "UL"));
-            Emit(name + "Keys", "ulong", encode.Keys.Select(v => v.ToString(CultureInfo.InvariantCulture) + "UL"));
-            Emit(name + "Codes", "ushort", encode.Values.Select(v => v.ToString(CultureInfo.InvariantCulture)));
-            Emit(name + "Prefixes", "int", encode.Keys.Where(v => (v & 0x1FFFFF) != 0).Select(v => (int)(v >> 21) - 1).Distinct().Select(v => v.ToString(CultureInfo.InvariantCulture)));
+            EmitEncode(name, encode);
         }
         output.Append("}\n");
         return output.ToString();
@@ -68,6 +99,20 @@ internal static class MappingGenerator
             int s = Hex(v);
             if (s < 0 || s > 0x10FFFF || s is >= 0xD800 and <= 0xDFFF) throw new InvalidDataException("Invalid Unicode scalar.");
             return s;
+        }
+        void EmitJefDecode(string prefix, ulong[] values)
+        {
+            var entries = values.Distinct().OrderBy(v => v).ToArray();
+            if (entries.Length > ushort.MaxValue) throw new InvalidDataException("Too many mapping entries.");
+            var ids = entries.Select((value, index) => (value, index)).ToDictionary(v => v.value, v => v.index);
+            Emit(prefix + "Ids", "ushort", values.Select(v => ids[v].ToString(CultureInfo.InvariantCulture)));
+            Emit(prefix + "Entries", "ulong", entries.Select(v => v.ToString(CultureInfo.InvariantCulture) + "UL"));
+        }
+        void EmitEncode(string prefix, SortedDictionary<ulong, int> values)
+        {
+            Emit(prefix + "Keys", "ulong", values.Keys.Select(v => v.ToString(CultureInfo.InvariantCulture) + "UL"));
+            Emit(prefix + "Codes", "ushort", values.Values.Select(v => v.ToString(CultureInfo.InvariantCulture)));
+            Emit(prefix + "Prefixes", "int", values.Keys.Where(v => (v & 0x1FFFFF) != 0).Select(v => (int)(v >> 21) - 1).Distinct().Select(v => v.ToString(CultureInfo.InvariantCulture)));
         }
         void Emit(string name, string type, IEnumerable<string> entries)
         {

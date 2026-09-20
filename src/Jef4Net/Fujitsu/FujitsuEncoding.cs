@@ -77,7 +77,9 @@ public sealed class FujitsuEncoding : Encoding
     public override int GetMaxByteCount(int charCount)
     {
         if (charCount < 0) throw new ArgumentOutOfRangeException(nameof(charCount));
-        long result = ((long)charCount + 4) * Math.Max(1, EncoderFallback.MaxCharCount) * 3 + 1;
+        long result;
+        try { result = checked(checked(((long)charCount + 4) * Math.Max(1, EncoderFallback.MaxCharCount)) * 3 + 1); }
+        catch (OverflowException) { throw new ArgumentOutOfRangeException(nameof(charCount)); }
         if (result > int.MaxValue) throw new ArgumentOutOfRangeException(nameof(charCount));
         return (int)result;
     }

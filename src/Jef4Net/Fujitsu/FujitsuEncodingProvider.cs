@@ -18,6 +18,10 @@ public sealed class FujitsuEncodingProvider : EncodingProvider
         string suffix = name.StartsWith("x-Fujitsu-", StringComparison.OrdinalIgnoreCase) ? name.Substring(10) : name;
         if (suffix.Equals("JEF", StringComparison.OrdinalIgnoreCase))
             return new FujitsuEncoding("x-Fujitsu-JEF", new Configuration(false, true, 0));
+        if (suffix.Equals("JEF-Roundtrip", StringComparison.OrdinalIgnoreCase))
+            return new FujitsuEncoding("x-Fujitsu-JEF-Roundtrip", new Configuration(false, true, 0, JefProfile.Roundtrip));
+        if (suffix.Equals("JEF-HanyoDenshi", StringComparison.OrdinalIgnoreCase))
+            return new FujitsuEncoding("x-Fujitsu-JEF-HanyoDenshi", new Configuration(false, true, 0, JefProfile.HanyoDenshi));
         string[] kinds = { "Lower", "Kana", "Ascii" };
         for (int i = 0; i < kinds.Length; i++)
         {
@@ -28,6 +32,10 @@ public sealed class FujitsuEncodingProvider : EncodingProvider
                 return new FujitsuEncoding("x-Fujitsu-" + ebcdic + "+JEF", new Configuration(true, false, i));
             if (suffix.Equals("JEF+" + ebcdic, StringComparison.OrdinalIgnoreCase))
                 return new FujitsuEncoding("x-Fujitsu-JEF+" + ebcdic, new Configuration(true, true, i));
+            if (suffix.Equals(ebcdic + "+JEF-HanyoDenshi", StringComparison.OrdinalIgnoreCase))
+                return new FujitsuEncoding("x-Fujitsu-" + ebcdic + "+JEF-HanyoDenshi", new Configuration(true, false, i, JefProfile.HanyoDenshi));
+            if (suffix.Equals("JEF-HanyoDenshi+" + ebcdic, StringComparison.OrdinalIgnoreCase))
+                return new FujitsuEncoding("x-Fujitsu-JEF-HanyoDenshi+" + ebcdic, new Configuration(true, true, i, JefProfile.HanyoDenshi));
         }
         return null;
     }

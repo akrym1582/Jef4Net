@@ -8,6 +8,19 @@ byte[] bytes = encoding.GetBytes("aあb海c");
 if (Convert.ToHexString(bytes) != "8128A4A2298228B3A42983" || encoding.GetString(bytes) != "aあb海c")
     throw new InvalidOperationException("Package smoke test failed.");
 Console.WriteLine("Package smoke test passed: " + encoding.GetString(bytes));
+Encoding roundtrip = Encoding.GetEncoding("JEF-Roundtrip", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+if (Convert.ToHexString(roundtrip.GetBytes("あ")) != "A4A2" ||
+    roundtrip.GetString(Convert.FromHexString("A4A2")) != "あ")
+    throw new InvalidOperationException("Roundtrip package test failed.");
+try { roundtrip.GetString(Convert.FromHexString("A1A1")); throw new InvalidOperationException("Roundtrip rejected-code test failed."); }
+catch (DecoderFallbackException) { }
+Encoding hanyo = Encoding.GetEncoding("JEF-HanyoDenshi", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+string ivs = "\u4E08\U000E0103";
+if (Convert.ToHexString(hanyo.GetBytes(ivs)) != "41A5" || hanyo.GetString(Convert.FromHexString("41A5")) != ivs)
+    throw new InvalidOperationException("HanyoDenshi package test failed.");
+Encoding mixedHanyo = Encoding.GetEncoding("EBCDIC-Lower+JEF-HanyoDenshi", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+if (mixedHanyo.GetString(mixedHanyo.GetBytes("a" + ivs + "b")) != "a" + ivs + "b")
+    throw new InvalidOperationException("Mixed HanyoDenshi package test failed.");
 if (args.Contains("--benchmark"))
 {
     foreach (string name in new[] { "x-Fujitsu-JEF", "x-Fujitsu-EBCDIC-Lower+JEF" })

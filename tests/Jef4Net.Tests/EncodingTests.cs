@@ -13,11 +13,15 @@ public class EncodingTests
     public static IEnumerable<object[]> Names()
     {
         yield return new object[] { "JEF" };
+        yield return new object[] { "JEF-Roundtrip" };
+        yield return new object[] { "JEF-HanyoDenshi" };
         foreach (string k in new[] { "Lower", "Kana", "Ascii" })
         {
             yield return new object[] { "EBCDIC-" + k };
             yield return new object[] { "EBCDIC-" + k + "+JEF" };
             yield return new object[] { "JEF+EBCDIC-" + k };
+            yield return new object[] { "EBCDIC-" + k + "+JEF-HanyoDenshi" };
+            yield return new object[] { "JEF-HanyoDenshi+EBCDIC-" + k };
         }
     }
     [Fact]
@@ -31,7 +35,8 @@ public class EncodingTests
             Assert.Empty(Encoding.GetEncoding(name).GetPreamble());
         }
         Assert.Null(FujitsuEncodingProvider.Instance.GetEncoding(0));
-        Assert.Null(FujitsuEncodingProvider.Instance.GetEncoding("JEF-HanyoDenshi"));
+        Assert.Null(FujitsuEncodingProvider.Instance.GetEncoding("JEF-Roundtrip+EBCDIC-Lower"));
+        Assert.Null(FujitsuEncodingProvider.Instance.GetEncoding("JEF-Roundtrip-HanyoDenshi"));
         Assert.Throws<ArgumentNullException>(() => FujitsuEncodingProvider.Instance.GetEncoding(null!));
         var e = Get("JEF");
         Assert.Throws<ArgumentNullException>(() => e.GetByteCount((string)null!));
@@ -106,7 +111,7 @@ public class EncodingTests
     public void StreamsAndAllSplits(string name)
     {
         var e = Get(name);
-        string text = name == "JEF" ? "あ海\u3000𫝃𛀙゙\uE000\uEC1D" : name.Contains('+') ? "AあB海\u3000𫝃𛀙゙\uE000\uEC1D" : "ABC 123\r\n";
+        string text = name == "JEF" ? "あ海\u3000𫝃𛀙゙\uE000\uEC1D" : name.Contains("HanyoDenshi") ? "あ\u4E08\U000E0103\uE000" : name == "JEF-Roundtrip" ? "あ海\u3000\uE000\uEC1D" : name.Contains('+') ? "AあB海\u3000𫝃𛀙゙\uE000\uEC1D" : "ABC 123\r\n";
         byte[] expected = e.GetBytes(text);
         for (int split = 0; split <= text.Length; split++)
             foreach (int capacity in new[] { 1, 2, 3, 7 })

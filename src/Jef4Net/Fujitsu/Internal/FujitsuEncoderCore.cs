@@ -58,7 +58,7 @@ internal static class FujitsuEncoderCore
             if (state.Prefix != 0)
             {
                 int prefix = state.Prefix - 1;
-                int pair = scalar > 0 && !malformed ? Mapping.Encode(true, config.Kind, Mapping.Key(prefix, scalar)) : -1;
+                int pair = scalar > 0 && !malformed ? Mapping.Encode(true, config.Kind, Mapping.Key(prefix, scalar), config.Profile) : -1;
                 if (pair >= 0)
                 {
                     Emit(config, ref state, true, pair);
@@ -75,7 +75,7 @@ internal static class FujitsuEncoderCore
             state.High = '\0';
             int index = high != 0 ? used - 1 : used;
             if (replacing) state.ReplacementIndex += consumed; else used += consumed;
-            if (!malformed && (config.Mixed || config.InitialJef) && Mapping.IsPrefix(scalar))
+            if (!malformed && (config.Mixed || config.InitialJef) && Mapping.IsPrefix(scalar, config.Profile))
             { state.Prefix = scalar + 1; continue; }
             if (malformed || !TryEmit(config, ref state, Mapping.Key(scalar)))
                 Replace(fallback, ref state, scalar, index, replacing);
@@ -87,14 +87,14 @@ internal static class FujitsuEncoderCore
     {
         if (config.Mixed || !config.InitialJef)
         {
-            int code = Mapping.Encode(false, config.Kind, key);
+            int code = Mapping.Encode(false, config.Kind, key, config.Profile);
             // Mixed encodings reserve these bytes for shift syntax (including K2 prefix).
             if (code >= 0 && (!config.Mixed || code is not (0x28 or 0x29 or 0x30 or 0x38)))
             { Emit(config, ref state, false, code); return true; }
         }
         if (config.Mixed || config.InitialJef)
         {
-            int code = Mapping.Encode(true, config.Kind, key);
+            int code = Mapping.Encode(true, config.Kind, key, config.Profile);
             if (code >= 0) { Emit(config, ref state, true, code); return true; }
         }
         return false;

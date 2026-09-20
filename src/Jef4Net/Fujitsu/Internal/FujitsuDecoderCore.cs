@@ -43,7 +43,7 @@ internal static class FujitsuDecoderCore
                 if (!(trail is >= 0xA1 and <= 0xFE || (lead == 0x40 && trail == 0x40)))
                 { Replace(fallback, ref state, new[] { lead }, used - 1); continue; }
                 used++;
-                ulong key = Mapping.Decode(true, config.Kind, (lead << 8) | trail);
+                ulong key = Mapping.Decode(true, config.Kind, (lead << 8) | trail, config.Profile);
                 if (key == 0) Replace(fallback, ref state, new[] { lead, trail }, used - 2);
                 else Push(ref state, key);
                 continue;
@@ -62,7 +62,7 @@ internal static class FujitsuDecoderCore
             }
             else
             {
-                ulong key = Mapping.Decode(false, config.Kind, b);
+                ulong key = Mapping.Decode(false, config.Kind, b, config.Profile);
                 if (key == 0) Replace(fallback, ref state, new[] { b }, used - 1);
                 else Push(ref state, key);
             }

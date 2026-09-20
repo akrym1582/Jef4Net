@@ -19,6 +19,7 @@ public class GeneratorTests
     [InlineData("[{\"code\":\"4040\",\"unicode\":\"0041\",\"options\":[]},{\"code\":\"4040\",\"unicode\":\"0041\",\"options\":[]}]")]
     [InlineData("[{\"code\":\"4040\",\"unicode\":\"0041\",\"options\":[]},{\"code\":\"4040\",\"unicode\":\"0042\",\"options\":[]}]")]
     [InlineData("[{\"code\":\"4040\",\"unicode\":\"0041\",\"options\":[]},{\"code\":\"41A1\",\"unicode\":\"0041\",\"options\":[]}]")]
+    [InlineData("[{\"code\":\"4040\",\"unicode\":\"0041\",\"sp\":\"3099\",\"hd\":\"E0100\",\"options\":[]}]")]
     public void InvalidDataIsRejected(string json)
     {
         string dir = Path.Combine(Path.GetTempPath(), "jef4net-generator-" + Guid.NewGuid());
