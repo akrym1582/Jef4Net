@@ -1,0 +1,23 @@
+# Third-party notices
+
+## jef4j mapping data
+
+- Upstream: https://github.com/hidekatsu-izuno/jef4j
+- Version in upstream pom.xml: 0.14.2
+- Commit: `40d13b0d92963c9b36993d1d742cdfc10c25b0f6`
+- Retrieved: 2026-09-20 (UTC)
+- Files: `src/test/resources/fujitsu_jef_mapping.json`,
+  `fujitsu_ebcdic_lower_mapping.json`, `fujitsu_ebcdic_kana_mapping.json`,
+  `fujitsu_ebcdic_ascii_mapping.json`
+- Data license: CC0 / public domain dedication. Upstream README spells this
+  “CC-O (Public Domain 相当)” and explicitly applies it to `src/test/resources/*.json`.
+  An unmodified README snapshot is retained in `data/jef4j/UPSTREAM-README.md`.
+- Upstream author: Hidekatsu Izuno and contributors.
+
+The four JSON files are preserved verbatim. Generated `FujitsuTables.g.cs` derives
+from these files. No Java serialized `.dat` assets are used. The conversion
+implementation is written for .NET; upstream Apache-2.0 test expectations were
+consulted to verify normal-profile selection and known conversion vectors.
+The retained upstream README is covered by upstream's Apache-2.0 license.
+
+Jef4Net's implementation is distributed under Apache-2.0; see LICENSE.

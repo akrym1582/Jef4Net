@@ -1,0 +1,479 @@
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.arnx/jef4j/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.arnx/jef4j)
+
+# jef4j
+
+## はじめに
+
+jef4j は、富士通株式会社のメインフレームで使われていた JEF 漢字コード体系、株式会社日立製作所のメインフレームで使われていた KEIS、日本電気株式会社のメインフレームで使われていた JIPS といったレガシーな文字コードを Unicode を相互変換するための Java 用 Charset ライブラリです。
+
+漢字のマッピングは、目検・手作業にて行っておりますので、誤りを発見した場合には Issue や Pull Request にてご連絡をお願いします。
+
+このプロダクトは富士通株式会社、株式会社日立製作所、日本電気株式会社、IBM社とはまったく関係ありませんので各社への問い合わせはご遠慮ください。
+
+## インストール
+
+Maven Central Repository から取得できます。
+
+```xml
+<dependency>
+  <groupId>net.arnx</groupId>
+  <artifactId>jef4j</artifactId>
+  <version>0.14.2</version>
+</dependency>
+```
+
+## 使い方
+
+jef4j 用に特別なAPIが用意されているわけではありません。クラスパスに jar ファイルを追加すると Java 標準 API を通して使用することができます。
+
+- new String(byte[] chars, Charset charset)
+- String.getBytes(Charset charset)
+- Charset.forName(String charset)
+
+```java
+Charset charset = Charset.forName("x-Fujitsu-JEF");
+String text = new String(bytes, charset);
+byte[] bytes = text.getBytes(charset);
+```
+
+指定できる文字セット名については各漢字コードの文字セット一覧を参照してください。
+
+### SBCS と MBCS を併用する文字セットの命名規則
+
+1 バイト文字セット（SBCS）と2バイト文字セット（MBCS）を併用する文字セットは、`x-ベンダー-文字セット名+文字セット名` という名前になります。`+` の左側の文字セットが初期状態となり、右側の文字セットへはシフトコードで切り替えます。エンコード終了時には左側の文字セットへ戻します。
+
+例えば、富士通 EBCDIC (英小文字) を初期状態として JEF-HanyoDenshi と併用する場合は `x-Fujitsu-EBCDIC-Lower+JEF-HanyoDenshi`、JEF-HanyoDenshi を初期状態とする場合は `x-Fujitsu-JEF-HanyoDenshi+EBCDIC-Lower` を指定します。
+
+バージョン 0.13.0 まで使用していたハイフン形式の名前と、旧富士通 SBCS 名を含む名前は、新しい名前のエイリアスとして引き続き使用できます。
+
+## ビルド
+
+ローカルビルドとテストは Maven で実行できます。
+
+```sh
+mise run build
+```
+
+マッピング生成用の補助ツールは mise task として実行できます。
+
+```sh
+mise run generate-index
+mise run generate-table
+```
+
+## JEF漢字コード
+
+### JEF漢字コードとは
+
+JEF (JAPANESE PROCESSING EXTENDED FEATURE) は、富士通株式会社のメインフレームで使われていた漢字コード体系です。Unicodeの整備も進んだ今となっては消え行く定めにあるものではありますが、企業の基幹系ではいまだ多数のメインフレームが稼働しているため、既存システムからのデータ移行は現在でも重要な技術です。
+
+1979 年に策定された、と聞くと古臭いと思われるかもしれません。しかし、実際には最新の Unicode でも異体字セレクタを使わないとカバーできない様々な漢字が収録されており、漢字集合としては決して古びたものではありません。富士通社のメインフレームは多くの公共機関でも使われており、その意味で日本の基盤を支える文字コード体系のひとつと言うことができるかもしれません。
+
+### JEF 漢字コード体系の構造
+
+JEF漢字コード体系自体は JIS78 (JIS C 6226:1978)に基づく JIS非漢字、JIS第一水準、第二水準からなる標準のコード域と拡張漢字、拡張非漢字と呼ばれる追加のコード域からなる 2 バイトのコード体系です。
+
+|カテゴリ|コード域|
+|-----|------|
+|全角空白|0x4040|
+|拡張漢字/拡張非漢字|0x41A1～0x7FFE|
+|利用者定義|0x80A1～0xA0FE|
+|標準漢字/標準非漢字|0xA1A2～0xFEFE|
+
+※下位バイトが A0、FF となる領域は使用されません。
+
+JEF 漢字コードの標準漢字/非漢字領域については、PC でも一般的に使われている SHIFT_JIS や EUC-JP 同様 JIS コード体系に基づいてるため概ね互換性があるのですが、 JEF 漢字コード策定後は改定時に参考字体が変更されているため、一部の字体に差異が発生しています。（Cyber Librarian「[JIS X 0208およびJIS X 0213の字形・字体の変更点](https://www.asahi-net.or.jp/~ax2s-kmtn/ref/jisrev.html)」が詳しい）
+具体的には、JEF 漢字コードは、JIS78 (JIS C 6226:1978) に基づいているのに対し、SHIFT_JIS などは、JIS83 (JIS X 0208:1983) に基づいているため、一部の字体やコード域に違いがあります。これは、JIS83 策定の翌年に策定された改訂版の JEF84 では、従来の領域には変更を加えず、変更された字体を拡張漢字領域に配置し上位互換性が保つ方針をとったためと思われます（ただし、理由は不明ですが、JEF79 の時点で JIS83 の字体になっていた文字が存在するためすべての文字が追加されているわけではないようです）。
+
+|JEF|元規格など|
+|-----|------|
+|JEF79|JIS78 + 拡張漢字/非漢字|
+|JEF84|JIS78 + 拡張漢字/非漢字 + JIS83追加/変更字体|
+
+拡張漢字/拡張非漢字の領域には、JIS第三、第四水準でもカバーできない多数の文字が収録されています。そのため PC から利用する場合には、追加の拡張漢字サポート製品を購入する必要があります。このような事情から、JEF漢字のサポートをうたうツールであっても、拡張漢字/拡張非漢字については、外字登録が必要など限定的なサポートしかされないことが多いようです。
+
+### 1 バイト文字との併用
+
+JEF漢字コード体系には半角英数や半角カナは含まれません。そのため、メインフレームではよく使われる EBCDIC という1バイト文字体系と併用して使われます。
+
+EBCDICのコード体系としては、IBM-EBCDIC 相当のもの、半角カナを追加した日立製作所 EBCDIK 相当のもの、US-ASCII との整合性を重視したマッピングの3種類が存在します。これらはいずれも 1 バイトのコード体系ですが、SHIFT_JIS や EUC-JP とは異なり JEF 漢字コードとコード域が重なるため両方を同時に使うことはできません。このため、シフトコードを使って1バイトコード体系と2バイトコード体系の切り替えを行います。
+
+漢字シフトについては、出力フォントサイズの違いを表すため３種類が用意されています。
+
+|コード名|カテゴリ|コード値|備考|
+|-------|--------|-------|----|
+|Kシフト|シフトアウト(12pt)|0x28||
+|K1シフト|シフトアウト(9pt)|0x38|エンコード時は 0x28 を使用します。|
+|K2シフト|シフトアウト(7pt)|0x30E2|エンコード時は 0x28 を使用します。|
+|Aシフト|シフトイン|0x29||
+
+### Unicode にマッピングできない文字の扱い
+
+日本の漢字コード体系の基本となっている JIS 漢字コード体系は、文字の標準化だけを行っており、字形の違いは表示上の問題であるとの方針で作成されています。そのため、例示される字形はたびたび変更されています。Unicode も同様にすべての字形にユニークな番号を振るのではなく、包摂基準に基き複数の字体を CJK 統合漢字に統合しています。そのため、いわゆる異体字については、異体字セレクタという別の仕組みを用いて表現する必要があります。
+
+例えば、JEF では、二点しんにょうの「辻󠄃(C4D4)」と一点しんにょうの「辻󠄂(67A5)」が別のコードとして登録されていますが、Unicode ではいずれも「辻(U+8FBB)」にマッピングされます。異体字セレクタを用いると、「辻󠄃(U+8FBB\_E0102)」および「辻󠄂(U+8FBB\_E0103)」という形で意図した字形で表示することができるようになります。
+
+jef4jでは、デコード(JEF → Unicode)時については、異体字セレクタを使うことで変換が可能になっています。
+
+現時点で、以下のコードを除き、すべてのコードが正しくマッピングされた状態となっています。
+
+- IVD汎用電子の異体字セレクタでも表現できない異体字２文字（顛、儲）⇒ 字形が近い異体字にマッピング
+- 変体仮名　⇒　詳細不明な一文字を除き、字形が近い異体字にマッピング
+- 一部のグラフ図形など特殊記号 ⇒　FFFD にマッピング
+- 一部の縦書き文字　⇒　FFFD にマッピング
+
+#### 利用者定義領域の取り扱い
+
+JEF の利用者定義文字 3102 文字は、Unicode 私的利用領域 E000～EC1D にマッピングされます。
+
+### 富士通系文字セット一覧
+
+|文字セット名|説明|
+|----------|----|
+|x-Fujitsu-EBCDIC-Lower|富士通 EBCDIC (英小文字)|
+|x-Fujitsu-EBCDIC-Kana|富士通 EBCDIC (カナ文字)|
+|x-Fujitsu-EBCDIC-Ascii|富士通 EBCDIC (ASCII)|
+|x-Fujitsu-JEF|富士通 JEF。異体字セレクタは出力されません。|
+|x-Fujitsu-JEF-Roundtrip|JEF のうち、相互変換（JEF⇔Unicode）が可能なコードのみに限定したものです。主にデータ移行用途です。|
+|x-Fujitsu-JEF-HanyoDenshi|富士通 JEF。異体字セレクタにはIVD汎用電子のものが使用されます。|
+|x-Fujitsu-JEF-AdobeJapan1|富士通 JEF。Adobe-Japan1の異体字セレクタを合わせて出力します。主にPDF用途です。|
+
+富士通系の併用文字セットは次の通りです。左の列はSBCS、右の列はMBCSを初期状態とします。
+
+|SBCSを初期状態とする名前|MBCSを初期状態とする名前|組み合わせ|
+|-----------------------|-----------------------|----------|
+|x-Fujitsu-EBCDIC-Lower+JEF|x-Fujitsu-JEF+EBCDIC-Lower|EBCDIC (英小文字) と JEF|
+|x-Fujitsu-EBCDIC-Lower+JEF-HanyoDenshi|x-Fujitsu-JEF-HanyoDenshi+EBCDIC-Lower|EBCDIC (英小文字) と JEF（IVD汎用電子）|
+|x-Fujitsu-EBCDIC-Lower+JEF-AdobeJapan1|x-Fujitsu-JEF-AdobeJapan1+EBCDIC-Lower|EBCDIC (英小文字) と JEF（Adobe-Japan1）|
+|x-Fujitsu-EBCDIC-Kana+JEF|x-Fujitsu-JEF+EBCDIC-Kana|EBCDIC (カナ文字) と JEF|
+|x-Fujitsu-EBCDIC-Kana+JEF-HanyoDenshi|x-Fujitsu-JEF-HanyoDenshi+EBCDIC-Kana|EBCDIC (カナ文字) と JEF（IVD汎用電子）|
+|x-Fujitsu-EBCDIC-Kana+JEF-AdobeJapan1|x-Fujitsu-JEF-AdobeJapan1+EBCDIC-Kana|EBCDIC (カナ文字) と JEF（Adobe-Japan1）|
+|x-Fujitsu-EBCDIC-Ascii+JEF|x-Fujitsu-JEF+EBCDIC-Ascii|EBCDIC (ASCII) と JEF|
+|x-Fujitsu-EBCDIC-Ascii+JEF-HanyoDenshi|x-Fujitsu-JEF-HanyoDenshi+EBCDIC-Ascii|EBCDIC (ASCII) と JEF（IVD汎用電子）|
+|x-Fujitsu-EBCDIC-Ascii+JEF-AdobeJapan1|x-Fujitsu-JEF-AdobeJapan1+EBCDIC-Ascii|EBCDIC (ASCII) と JEF（Adobe-Japan1）|
+
+SBCS から JEF へ切り替えるときは K シフト、JEF から SBCS へ切り替えるときは A シフトを出力します。デコード時は K、K1、K2 のいずれの漢字シフトコードも受け入れます。
+
+変換に失敗した場合の置換文字としては、半角/全角空白が使用されます。Windows-31J など他の文字コードでは'?'が使用されますが、シフトイン/シフトアウトでの切り替えがあるため、どちらでも有効な文字として解釈できる半角空白（JEF/EBCDIC併用時は半角空白２文字）に置換しています。
+
+[現時点でのマッピングはこちら](https://hidekatsu-izuno.github.io/jef4j/docs/fujitsu_mappings.html)からご覧いただけます。
+
+### JEF に関する参考文献
+
+- FACOM JEF 文字コード索引辞書 (1987年/第三版): 拡張漢字についてはこの資料を元にしています。現在では入手困難なため、図書館にて（書籍貸出不可のため）閲覧および著作権法で許可された範囲でコピーしたものを参照し、独自で Unicode へのマッピングを作成しています。
+- [JHT(ホスト連携ツール)SIMPLE版](http://www.vector.co.jp/soft/winnt/util/se094205.html)： Windows-31J の範囲は概ねこのツールからマッピングを生成しています。ただし、Windows-31J は JIS83 をベースにしているため、Unicode へのマッピングには不適当な部分があります。jef4j では、字形重視で Unicode にマッピングするなど多々変更を加えています。
+- [Linkexpress 運用ガイド コード変換型の対応表(EUC(S90)系/JEF-EBCDIC系)](http://software.fujitsu.com/jp/manual/manualfiles/m140001/j2x15930/12z200/unyo05/unyo0424.html)： JIS の字体変更の影響で追加された文字のマッピングがここに記載されています。jef4j では、Unicode との変換を目的としているため字形重視でマッピングしています。
+- [Canon F359 ユーザーズガイド](https://web.archive.org/web/20251211081906/http://cweb.canon.jp/manual/lasershot/pdf/crmes-f359.pdf)：JEF 拡張非漢字のマッピングはこのガイドを元に作成しています。Unicode に該当する記号が存在しないため、変換できない部分があります。
+
+## KEIS 漢字コード
+
+### KEIS 漢字コードとは
+
+KEIS (KANJI EXTENDED INFORMATION PROCESSING SYSTEM) は株式会社日立製作所のメインフレームで使われていた漢字コード体系です。
+
+### KEIS 漢字コード体系の構造
+
+KEIS 漢字コード体系は、JIS78 (JIS C 6226:1978)に基づく KEIS78 と JIS83 (JIS X 0208:1983) に基づく KEIS-83 の２つから構成される２バイトコード体系です。JEF や JIPS が JIS83 での字体変更に対し既存コード体系の拡張（字体変更された文字を別コードで追加）する方式を選んだのに対し、KEIS は漢字コード体系自体が変更されています。
+
+KEIS83、はその後、IBM拡張文字への対応などが行われた KEIS90、JIS2004に対応した KEIS2004 へと拡張されたようです。
+
+### KEIS 漢字コード体系の構造
+
+|カテゴリ|コード域|
+|-----|------|
+|全角空白|0x4040|
+|拡張文字セット3|0x59A1～0x80FE|
+|ユーザ定義文字|0x81A1～0xA0FE|
+|基本文字セット(非漢字)|0xA1A1～0xACFE|
+|システムユース文字、書式制御文|0xADA1～0xAFFE|
+|基本文字セット(漢字)|0xB0A1～0xCEFE|
+|拡張文字セット1|0xD1A1～0xFEFE|
+
+基本文字セットは JIS 第一水準、拡張文字セット1は JIS 第二水準の JIS コード体系に 0x8080 加算したものであるため、結果的に EUC-JP と互換性があります（特に字体変更のない KEIS-83 はそのままです）。拡張文字セット2は存在しません。
+
+拡張文字セット3 についてどのような文字が配置されているかは、情報がなく対応できておりません。情報をお持ちの方は<a href="https://github.com/hidekatsu-izuno/jef4j/issues">issues までご連絡</a>いただけますと幸いです。
+
+※書籍のスクリーンショットを公開することは著作権法上許容されませんのでお控えください。一方、文字や字形そのものやコードのマッピング自体は著作権法上の保護対象ではないため記載いただいても構いません。また、「HITAC文字コード表」、「日本電気標準文字セット辞書（拡張）」など原資料をお持ちの方で書籍をお譲り頂ける方がおりましたら各1万円を超えない範囲で買い取りさせてただきます。
+
+※富士通社資料には 0x9FA1～0x9FD8 に拡張文字セット3が割り当てられているという記載があるが、日立社資料にそれを裏付ける資料は見つかっていない。
+
+### KEIS と EBCDIC/EBCDIK の併用
+
+KEIS 漢字コード体系には半角英数や半角カナは含まれませんので EBCDIC/EBCDIK と併用して使われます。EBCDICはASCIIとは異なり8bit体系でありコードが重なるため、シフトコードを使って1バイトコード体系と2バイトコード体系の切り替えを行う必要があります。
+
+|コード名|カテゴリ|コード値|
+|--------|--------|-------|
+|全角シフト|シフトアウト|0x0A42|
+|半角シフト|シフトイン|0x0A41|
+
+#### KEIS のユーザ定義文字の取り扱い
+
+KEIS のユーザ定義文字は、Unicode 私的利用領域には以下のようにマッピングされます。
+
+- 0x81A1～0xA0FE (3008文字): E000～EBBF
+
+### 日立系文字セット一覧（ベータ）
+
+|文字セット名|説明|
+|----------|----|
+|x-Hitachi-EBCDIC|日立 EBCDIC|
+|x-Hitachi-EBCDIK|日立 EBCDIK|
+|x-Hitachi-KEIS78|日立 KEIS78。異体字セレクタは出力されません。|
+|x-Hitachi-KEIS78-HanyoDenshi|日立 KEIS78。異体字セレクタにはIVD汎用電子のものが使用されます。|
+|x-Hitachi-KEIS78-AdobeJapan1|日立 KEIS78。異体字セレクタにはAdobe-Japan1のものが使用されます（主にPDF用途）。|
+|x-Hitachi-KEIS78-ShiftSpaceSingle|日立 KEIS78。異体字セレクタは出力されません。0x4040は半角空白2文字にデコードされます。|
+|x-Hitachi-KEIS78-ShiftSpaceSingle-HanyoDenshi|日立 KEIS78。IVD汎用電子の異体字セレクタを使用し、0x4040は半角空白2文字にデコードされます。|
+|x-Hitachi-KEIS78-ShiftSpaceSingle-AdobeJapan1|日立 KEIS78。Adobe-Japan1の異体字セレクタを使用し、0x4040は半角空白2文字にデコードされます。|
+|x-Hitachi-KEIS83|日立 KEIS83/90。異体字セレクタは出力されません。|
+|x-Hitachi-KEIS83-HanyoDenshi|日立 KEIS83/90。異体字セレクタにはIVD汎用電子のものが使用されます。|
+|x-Hitachi-KEIS83-AdobeJapan1|日立 KEIS83/90。異体字セレクタにはAdobe-Japan1のものが使用されます（主にPDF用途）。|
+|x-Hitachi-KEIS83-ShiftSpaceSingle|日立 KEIS83/90。異体字セレクタは出力されません。0x4040は半角空白2文字にデコードされます。|
+|x-Hitachi-KEIS83-ShiftSpaceSingle-HanyoDenshi|日立 KEIS83/90。IVD汎用電子の異体字セレクタを使用し、0x4040は半角空白2文字にデコードされます。|
+|x-Hitachi-KEIS83-ShiftSpaceSingle-AdobeJapan1|日立 KEIS83/90。Adobe-Japan1の異体字セレクタを使用し、0x4040は半角空白2文字にデコードされます。|
+
+日立系の併用文字セットは次の通りです。左の列はSBCS、右の列はMBCSを初期状態とします。
+
+|SBCSを初期状態とする名前|MBCSを初期状態とする名前|組み合わせ|
+|-----------------------|-----------------------|----------|
+|x-Hitachi-EBCDIC+KEIS78|x-Hitachi-KEIS78+EBCDIC|EBCDIC と KEIS78|
+|x-Hitachi-EBCDIC+KEIS78-HanyoDenshi|x-Hitachi-KEIS78-HanyoDenshi+EBCDIC|EBCDIC と KEIS78（IVD汎用電子）|
+|x-Hitachi-EBCDIC+KEIS78-AdobeJapan1|x-Hitachi-KEIS78-AdobeJapan1+EBCDIC|EBCDIC と KEIS78（Adobe-Japan1）|
+|x-Hitachi-EBCDIC+KEIS78-ShiftSpaceSingle|x-Hitachi-KEIS78-ShiftSpaceSingle+EBCDIC|EBCDIC と KEIS78（0x4040を半角空白2文字に変換）|
+|x-Hitachi-EBCDIC+KEIS78-ShiftSpaceSingle-HanyoDenshi|x-Hitachi-KEIS78-ShiftSpaceSingle-HanyoDenshi+EBCDIC|EBCDIC と KEIS78（IVD汎用電子、0x4040を半角空白2文字に変換）|
+|x-Hitachi-EBCDIC+KEIS78-ShiftSpaceSingle-AdobeJapan1|x-Hitachi-KEIS78-ShiftSpaceSingle-AdobeJapan1+EBCDIC|EBCDIC と KEIS78（Adobe-Japan1、0x4040を半角空白2文字に変換）|
+|x-Hitachi-EBCDIC+KEIS83|x-Hitachi-KEIS83+EBCDIC|EBCDIC と KEIS83/90|
+|x-Hitachi-EBCDIC+KEIS83-HanyoDenshi|x-Hitachi-KEIS83-HanyoDenshi+EBCDIC|EBCDIC と KEIS83/90（IVD汎用電子）|
+|x-Hitachi-EBCDIC+KEIS83-AdobeJapan1|x-Hitachi-KEIS83-AdobeJapan1+EBCDIC|EBCDIC と KEIS83/90（Adobe-Japan1）|
+|x-Hitachi-EBCDIC+KEIS83-ShiftSpaceSingle|x-Hitachi-KEIS83-ShiftSpaceSingle+EBCDIC|EBCDIC と KEIS83/90（0x4040を半角空白2文字に変換）|
+|x-Hitachi-EBCDIC+KEIS83-ShiftSpaceSingle-HanyoDenshi|x-Hitachi-KEIS83-ShiftSpaceSingle-HanyoDenshi+EBCDIC|EBCDIC と KEIS83/90（IVD汎用電子、0x4040を半角空白2文字に変換）|
+|x-Hitachi-EBCDIC+KEIS83-ShiftSpaceSingle-AdobeJapan1|x-Hitachi-KEIS83-ShiftSpaceSingle-AdobeJapan1+EBCDIC|EBCDIC と KEIS83/90（Adobe-Japan1、0x4040を半角空白2文字に変換）|
+|x-Hitachi-EBCDIK+KEIS78|x-Hitachi-KEIS78+EBCDIK|EBCDIK と KEIS78|
+|x-Hitachi-EBCDIK+KEIS78-HanyoDenshi|x-Hitachi-KEIS78-HanyoDenshi+EBCDIK|EBCDIK と KEIS78（IVD汎用電子）|
+|x-Hitachi-EBCDIK+KEIS78-AdobeJapan1|x-Hitachi-KEIS78-AdobeJapan1+EBCDIK|EBCDIK と KEIS78（Adobe-Japan1）|
+|x-Hitachi-EBCDIK+KEIS78-ShiftSpaceSingle|x-Hitachi-KEIS78-ShiftSpaceSingle+EBCDIK|EBCDIK と KEIS78（0x4040を半角空白2文字に変換）|
+|x-Hitachi-EBCDIK+KEIS78-ShiftSpaceSingle-HanyoDenshi|x-Hitachi-KEIS78-ShiftSpaceSingle-HanyoDenshi+EBCDIK|EBCDIK と KEIS78（IVD汎用電子、0x4040を半角空白2文字に変換）|
+|x-Hitachi-EBCDIK+KEIS78-ShiftSpaceSingle-AdobeJapan1|x-Hitachi-KEIS78-ShiftSpaceSingle-AdobeJapan1+EBCDIK|EBCDIK と KEIS78（Adobe-Japan1、0x4040を半角空白2文字に変換）|
+|x-Hitachi-EBCDIK+KEIS83|x-Hitachi-KEIS83+EBCDIK|EBCDIK と KEIS83/90|
+|x-Hitachi-EBCDIK+KEIS83-HanyoDenshi|x-Hitachi-KEIS83-HanyoDenshi+EBCDIK|EBCDIK と KEIS83/90（IVD汎用電子）|
+|x-Hitachi-EBCDIK+KEIS83-AdobeJapan1|x-Hitachi-KEIS83-AdobeJapan1+EBCDIK|EBCDIK と KEIS83/90（Adobe-Japan1）|
+|x-Hitachi-EBCDIK+KEIS83-ShiftSpaceSingle|x-Hitachi-KEIS83-ShiftSpaceSingle+EBCDIK|EBCDIK と KEIS83/90（0x4040を半角空白2文字に変換）|
+|x-Hitachi-EBCDIK+KEIS83-ShiftSpaceSingle-HanyoDenshi|x-Hitachi-KEIS83-ShiftSpaceSingle-HanyoDenshi+EBCDIK|EBCDIK と KEIS83/90（IVD汎用電子、0x4040を半角空白2文字に変換）|
+|x-Hitachi-EBCDIK+KEIS83-ShiftSpaceSingle-AdobeJapan1|x-Hitachi-KEIS83-ShiftSpaceSingle-AdobeJapan1+EBCDIK|EBCDIK と KEIS83/90（Adobe-Japan1、0x4040を半角空白2文字に変換）|
+
+従来の `x-Hitachi-KEIS78-HanyoDenshi-EBCDIC` などの名前は、SBCSを初期状態とする形式のエイリアスです。
+
+[現時点でのマッピングはこちら](https://hidekatsu-izuno.github.io/jef4j/docs/hitachi_mappings.html)からご覧いただけます。
+
+#### KEIS に関する資料
+
+- [画面・帳票サポートシステム　XMAP3 メインフレーム連携ガイド](https://itpfdoc.hitachi.co.jp/manuals/3020/3020759580/G5950334.HTM)
+- [Hitachi Virtual Storage Platform 5000 Cross-OS File Exchange ユーザーズガイド](https://itpfdoc.hitachi.co.jp/manuals/4047/40471JU64_SVOSRF987/40471JU64.pdf)
+- [Interstage Charset Manager Standard Edition V9 使用手引書 C.8 KEISコード系の概要](https://software.fujitsu.com/jp/manual/manualfiles/m200002/b1wd0741/14z200/b0741-c-08-00.html)
+- [文字コード表 日本語EUC(euc-jp)](http://charset.7jp.net/euc.html)
+- [OpenTP1 Version 7 マニュアル](https://itpfdoc.hitachi.co.jp/manuals/3000/30003D5851/CLNT0276.HTM)
+- [PRINT DATA EXCHANGE - Form Designer マニュアル](https://itpfdoc.hitachi.co.jp/manuals/3020/30203P0360/PDEF0203.HTM)
+
+## JIPS 漢字コード
+
+### JIPS 漢字コードとは
+
+JIPS (Japanese Information Processing System) とは日本電気株式会社のオフコンで使われていた漢字コード体系です。
+JIPS には、システムの違いによりJISコード配列をそのまま採用した JIPS(J) と JISコードを EBCDIC 範囲にマッピングした JIPS(E) があります。また、JIPS(J) を漢字シフトなしで利用できるように工夫した NEC内部コード というものもあります。
+
+- ACOS-2/4: EBCDIC(カナ) + JIPS(E)
+- ACOS-6: JIS8 + JIPS(J)
+- ITX、A-VXなど: EBCDIC(カナ) + NEC内部コード(E) ※漢字シフト不要
+- NTOS、PTOSなど: JIS8 + NEC内部コード(J) ※漢字シフト不要
+
+### JIPS 漢字コード体系の構造
+
+JIPS 漢字コード体系は ISO/IEC 2022 同様 2バイトの各バイトを2分割ずつにしたG0～G3集合に文字が配置されます。
+このうち G0集合については、基本的に JIS78 (JIS C 6226:1978) の JISコード配列がそのまま配置されています。また、G3集合は使用されていません。
+
+|カテゴリ|コード域|
+|-----|------|
+|G0集合|0x2121～0x7E7E|
+|G1集合|0xA1A1～0xFEFE|
+|G2集合|0xA121～0xFE7E|
+
+なおG0、G1集合のうち下記範囲は外字領域として定義されています。
+
+|カテゴリ|コード域|
+|-----|------|
+|G0外字領域|0x7421～0x7E7E|
+|G1外字領域|0xE0A1～0xFEFE|
+
+G1、G2集合 にどのような文字が配置されているかは、情報がなく部分的な対応に留まっています。情報をお持ちの方は<a href="https://github.com/hidekatsu-izuno/jef4j/issues">issues までご連絡</a>いただけますと幸いです。
+
+※書籍のスクリーンショットを公開することは著作権法上許容されませんのでお控えください。一方、文字や字形そのものやコードのマッピング自体は著作権法上の保護対象ではないため記載いただいても構いません。また、「HITAC文字コード表」、「日本電気標準文字セット辞書（拡張）」など原資料をお持ちの方で書籍をお譲り頂ける方がおりましたら各1万円を超えない範囲で買い取りさせてただきます。
+
+### JIPS と EBCDICカナ文字 の併用
+
+JIPS 漢字コード体系には半角英数や半角カナは含まれませんので EBCDICカナ文字と併用して使われます。EBCDICはASCIIとは異なり8bit体系でありコードが重なるため、シフトコードを使って1バイトコード体系と2バイトコード体系の切り替えを行う必要があります。
+
+|コード名|カテゴリ|コード値|
+|--------|--------|-------|
+|全角シフト|シフトアウト|JIPS(J)：0x1A70、JIPS(E)：0x3F75|
+|半角シフト|シフトイン|JIPS(J)：0x1A71、JIPS(E)：0x3F76|
+
+### JIPS の外字領域の取り扱い
+
+JIPSの利用者定義文字は各集合の後半部分に配置されます。複数のパートに分かれるため、Unicode 私的利用領域に以下のようにマッピングされます。
+
+- G0集合 0x7421～0x7E7E (1034文字): E000～E409
+- G1集合 0xE0A1～0xFEFE (2914文字): E40A～EF6B
+
+### JIPS(J) と JIPS(E) の変換
+
+JIPS(E) は JIPS(J) の各バイトを JIS8 (JIS X0201) とEBCDIC の同一文字のバイト値をマッピングし変換したものです。
+
+※外字に関しては上記ルールに従わないという情報もあるのですが変換方法がわからず、現時点ではそのまま変換をかけています。
+
+### JIPS(J) とNEC内部コードの変換
+
+jef4j では現時点ではサポートしていません。
+
+### NEC系文字セット（ベータ）
+
+|文字セット名|説明|
+|----------|----|
+|x-NEC-JIS8|NEC JIS X0201|
+|x-NEC-EBCDIK|NEC EBCDIC カタカナ|
+|x-NEC-JIPSJ|NEC JIPS(J)。異体字セレクタは出力されません。|
+|x-NEC-JIPSJ-HanyoDenshi|NEC JIPS(J)。異体字セレクタにはIVD汎用電子のものが使用されます。|
+|x-NEC-JIPSJ-AdobeJapan1|NEC JIPS(J)。異体字セレクタにはAdobe-Japan1のものが使用されます（主にPDF用途）。|
+|x-NEC-JIPSE|NEC JIPS(E)。異体字セレクタは出力されません。|
+|x-NEC-JIPSE-HanyoDenshi|NEC JIPS(E) 。異体字セレクタにはIVD汎用電子のものが使用されます。|
+|x-NEC-JIPSE-AdobeJapan1|NEC JIPS(E) 。異体字セレクタにはAdobe-Japan1のものが使用されます（主にPDF用途）。|
+
+NEC系の併用文字セットは次の通りです。左の列はSBCS、右の列はMBCSを初期状態とします。
+
+|SBCSを初期状態とする名前|MBCSを初期状態とする名前|組み合わせ|
+|-----------------------|-----------------------|----------|
+|x-NEC-JIS8+JIPSJ|x-NEC-JIPSJ+JIS8|JIS8 と JIPS(J)|
+|x-NEC-JIS8+JIPSJ-HanyoDenshi|x-NEC-JIPSJ-HanyoDenshi+JIS8|JIS8 と JIPS(J)（IVD汎用電子）|
+|x-NEC-JIS8+JIPSJ-AdobeJapan1|x-NEC-JIPSJ-AdobeJapan1+JIS8|JIS8 と JIPS(J)（Adobe-Japan1）|
+|x-NEC-EBCDIK+JIPSE|x-NEC-JIPSE+EBCDIK|EBCDIK と JIPS(E)|
+|x-NEC-EBCDIK+JIPSE-HanyoDenshi|x-NEC-JIPSE-HanyoDenshi+EBCDIK|EBCDIK と JIPS(E)（IVD汎用電子）|
+|x-NEC-EBCDIK+JIPSE-AdobeJapan1|x-NEC-JIPSE-AdobeJapan1+EBCDIK|EBCDIK と JIPS(E)（Adobe-Japan1）|
+
+従来の `x-NEC-JIPSJ-JIS8`、`x-NEC-JIPSE-EBCDIK` などのハイフン形式は、対応するSBCSを初期状態とする形式のエイリアスです。
+
+[現時点でのマッピングはこちら](https://hidekatsu-izuno.github.io/jef4j/docs/nec_mappings.html)からご覧いただけます。
+
+### JIPS に関する参考文献
+
+- [Interstage Charset Manager Standard Edition V9 使用手引書 C.7 JIPSコード系の概要](https://software.fujitsu.com/jp/manual/manualfiles/m200002/b1wd0741/14z200/b0741-c-07-00.html)
+- [オフコン練習帳 ２バイト文字系の文字コード体系](https://offcom.jp/modules/amanual/index.php/ouyou/mojicode/moji_code10.html)
+- [歴博 REKIHAKU 小形克宏「Windows外字と、その互換性をめぐる争い」](http://kanji.zinbun.kyoto-u.ac.jp/~yasuoka/publications/2013-09Rekihaku.pdf)
+- [PC-9801プログラマーズBible](https://dn790009.ca.archive.org/0/items/PC9801Bible/PC-9801Bible_%E6%9D%B1%E4%BA%AC%E7%90%86%E7%A7%91%E5%A4%A7%E5%AD%A6%20%281%29.pdf)
+- [NEC WebOTX Manual V10.1 (第7版)](https://docs.nec.co.jp/sites/default/files/webotx_manual_v101/WebOTX/101/html/serviceintegration/olfadapter/ref/library/convert.html?utm_source=chatgpt.com)
+- [uCosminexus Interschema ユーザーズガイド 付録K.4　EBCDIC／EBCDIKのコード表](https://itpfdoc.hitachi.co.jp/manuals/3020/30203J3820/ISUS0268.HTM)
+
+## 異体字セレクタとは
+
+漢字は元々、人間が紙に書いていたこともあり、「高」と「髙」のように同じ文字であっても字体に揺れがあります。
+このようなものを異体字と呼びます。
+
+UNICODEでは原則として異体字は取り扱わず、下記の例外を除き、同じ文字はひとつのコードにマッピングする方針で設計されました。
+
+- ソース分離規則: 源泉となった体系（SHIFT_JISなど）で異なる文字として扱われているものは、相互運用性を確保するため異なるコードを付与する。
+- 申請上の誤り: 本来同じ文字として扱われるべきものが異なるコードとして申請され受理されてしまった。
+
+しかしながら、印刷など字体の違いを明確にしたいニーズはあり、UNICODE ではこの用途として異体字セレクタが提供されています。
+この異体字セレクタを使うと標準字体の後にヒントを埋め込む形で字体を明確化することができます。JEF などホスト系の拡張漢字は UNICODE の標準字体の範囲に収まらないため、この異体字セレクタを使う必要があります。
+
+異体字セレクタには包摂基準の違いにより次の2種類があります。包摂基準とは、止め跳ねの違いのように、同じ文字とするか異なる文字とするかは解釈を統一するための基準です。
+
+- Adobe-Japan1
+- 汎用電子情報交換環境整備プログラム（Hanyo-Denshi）＋文字情報基盤整備事業（Moji_Joho）
+
+前者は従来 PDF や Adobe 製品に使われてきたフォントの区別用途で、後者は公共系システムの文字基盤のために整備されたものです。
+jef4j では v0.11.0 で Adobe-Japan1 異体字セレクタへの出力にも対応しました。
+
+### Adobe-Japan1 異体字セレクタ対応について
+
+本対応については、安岡孝一さんの成果をベースにしてマッピングを作成しています。
+
+- [Adobe-Japan1-6とMJ文字図形名の対応](http://kanji.zinbun.kyoto-u.ac.jp/~yasuoka/publications/2017-03-10.pdf)
+
+
+## IBM 漢字コード
+
+### IBM 漢字コードとは
+
+IBM のメインフレームで使われる日本語文字コードは、英数字やカタカナを表す1バイトの EBCDIC（SBCS）と、漢字などを表す2バイトの文字セット（DBCS）を組み合わせたものです。混在データでは、SO（0x0E）で SBCS から DBCS、SI（0x0F）で DBCS から SBCS へ切り替えます（[IBM「DBCS データの処理」](https://www.ibm.com/docs/ja/i/7.6.0?topic=applications-working-dbcs-data)）。
+
+jef4j では、カタカナ用 SBCS の CCSID 8482、ラテン文字用 SBCS の CCSID 5123、および日本語 DBCS の CCSID 11684 と、それらを組み合わせた文字セットをサポートします。
+
+### IBM系文字セット（ベータ）
+
+Java には標準で多くの IBM 系文字セットが用意されていますが、ラウンドトリップに問題があったこと、最新の文字集合をサポートしていないことから別途変換表を用意しています。
+
+|文字セット名|説明|
+|----------|----|
+|x-IBM-8482|IBM EBCDIC 日本語カタカナ（ユーロ対応）のSBCS。|
+|x-IBM-5123|IBM EBCDIC 日本語ラテン（ユーロ対応）のSBCS。|
+|x-IBM-11684|IBM 日本語ホストDBCS（JIS X 0213、ユーロ対応）。|
+|x-IBM-8482+11684|CCSID 8482 を初期状態として 11684 とSO/SIで切り替える、日本語カタカナ・漢字EBCDIC。|
+|x-IBM-11684+8482|CCSID 11684 を初期状態として 8482 とSO/SIで切り替える、日本語カタカナ・漢字EBCDIC。|
+|x-IBM-5123+11684|CCSID 5123 を初期状態として 11684 とSO/SIで切り替える、日本語ラテン・漢字EBCDIC。|
+|x-IBM-11684+5123|CCSID 11684 を初期状態として 5123 とSO/SIで切り替える、日本語ラテン・漢字EBCDIC。|
+
+`x-IBM-1390` は `x-IBM-8482+11684`、`x-IBM-1399` は `x-IBM-5123+11684` のエイリアスです。
+
+本ライブラリでは、コード領域 80A1～A0FE をUnicode私的利用領域 U+E000～U+EC1D にマッピングします。
+
+[現時点でのマッピングはこちら](https://hidekatsu-izuno.github.io/jef4j/docs/ibm_mappings.html)からご覧いただけます。
+
+## ライセンス
+
+Apache License 2.0 で配布します。
+
+文字コードのマッピングファイルについては CC-O (Public Domain 相当) にて配布いたします。
+
+- src/test/resources/*.json
+
+## 変更履歴
+- 2026/7/18 version 0.14.1:
+  - 富士通系EBCDICコードの名前をより適切なものに変更しました。ただし、従来の名前も引き続き利用可能です。
+- 2026/7/18 version 0.14.0:
+  - 日立系文字セットのAdobe-Japan-1系文字セットが使用できなかった問題を修正しました。
+  - その他、細かい不具合を修正し、コードの整理を行いました。
+- 2026/7/12 version 0.13.0:
+  - 「x-Fujitsu-JEF」のエンコード時にCJK互換文字を持つ一部の文字が不適切に変換されていた問題を修正しました。
+  - IBM系のホストコードをサポートしました。
+  - その他、細かい不具合を修正しました。
+- 2026/4/25 version 0.12.2:
+  - 「x-Fujitsu-JEF」のデコード時に「A1A1」が来た場合、全角空白に変換するようにしました。「A1A1」は正式にはJEFコードではありませんが、JISコードの全角空白に当たるため環境により変換が必要となる場合があります。
+  - 「x-Hitachi-EBCDIK」においてA8、8Fのマッピングが間違っていた問題を修正しました。（#5）
+  - 「x-Hitachi-KEIS*」系のコード体系において4040を半角スペース2文字にデコードする文字セットを追加しました。（#6）
+- 2026/3/12 version 0.12.1:
+  - 「x-Fujitsu-(EBCDIC|EBCDIK|ASCII)」においてマッピング不備により0x1Cのラウンドトリップが失敗する問題を修正しました。
+  - 「x-Fujitsu-JEF-(EBCDIC|EBCDIK|ASCII)」において7pt用の漢字シフトコードをサポートしました。
+- 2026/3/11 version 0.12.0:
+  - 【非互換】「x-Fujitsu-JEF-Reversible」の名前を、より適切な「x-Fujitsu-JEF-Roundtrip」に変更しました。
+  - 日立系やNEC系のコード体系にも対応しました。現段階ではJIS互換の標準領域のみのサポートとなります。
+- 2025/8/13 version 0.11.0: 
+  - Adobe Japan-1 の IVS を使った変換に対応しました。
+  - データ移行を想定し逆変換（JEF→Unicode→JEF）が可能なコードのみに限定した「x-Fujitsu-JEF-Reversible」を追加しました。
+- 2025/8/8 version 0.10.2: 
+  - 変体仮名のデコード時にエラーが出る問題を修正しました。
+  - 迩、珊、悗を縮退する際に標準漢字に戻るよう縮退変換の順序を修正しました。
+  - 武を字母とする変体仮名 71E0 を U+1B0D0 にマッピングしました。
+- 2025/5/19 version 0.10.1: x-Fujitsu-(EBCDIC|EBCDIK|ASCII|JEF) 指定時にシフトコードがエラーとならず無視される問題を修正しました。
+- 2025/5/10 version 0.10.0: 汎用電子指定時のデコードにて異体字セレクタを出力できるよう改善しました。従来と同じ動作にしたい場合は、デコード時に「-HanyoDenshi」が含まれていない文字セットを指定してください。また、「哨󠄁」の異体字セレクタが誤っていたため修正しました。
+- 2021/10/20 version 0.9.3: 「鯵鰺篭籠」のマッピングが間違っていることが判明したため修正しました。
+- 2021/4/27 version 0.9.2: 「棒」のマッピングが漏れていることが判明したため追加しました。
+- 2019/9/20 version 0.9.0: FACOM JEF 文字コード索引辞書 (1987年/第三版) に基づきマッピング等の見直しを行いました。
+- 2018/3/27 version 0.7.2: 拡張非漢字領域にあった漢字部品用コードのマッピングが漏れていたため追加しました。
+- 2018/3/11 version 0.7.1: 字形に対する Unicode 値が不明であった２文字（JEF:6AC6、JEF:48C2）が CJK 統合漢字拡張 B および F に存在することがわかったためマッピングを修正しました。
+- 2018/3/11 version 0.7.0: 「FACOM JEF 文字コード索引辞書 (1980/第二版)」 に基づき拡張漢字領域のコードを追加し、多数のマッピング不備を修正しました。
+
+<!--
+- mvn verify
+- git tag vX.XX.X && git push origin --tags
+- 取り消す場合: git tag -d vX.XX.X && git push origin :refs/tags/vX.XX.X
+- mvn -Prelease clean deploy
+-->

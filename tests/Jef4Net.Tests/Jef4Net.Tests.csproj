@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><IsPackable>false</IsPackable><IsTestProject>true</IsTestProject><LibraryTargetFramework Condition="'$(LibraryTargetFramework)' == ''">net10.0</LibraryTargetFramework></PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4"><PrivateAssets>all</PrivateAssets></PackageReference>
+    <ProjectReference Include="../../src/Jef4Net/Jef4Net.csproj" SetTargetFramework="TargetFramework=$(LibraryTargetFramework)" />
+    <ProjectReference Include="../../src/Jef4Net.CodeGen/Jef4Net.CodeGen.csproj" />
+    <None Include="../../data/jef4j/*mapping.json" Link="data/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

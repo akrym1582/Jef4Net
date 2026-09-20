@@ -1,0 +1,27 @@
+using System.Diagnostics;
+using System.Text;
+using Jef4Net.Fujitsu;
+
+Encoding.RegisterProvider(FujitsuEncodingProvider.Instance);
+Encoding encoding = Encoding.GetEncoding("x-Fujitsu-EBCDIC-Lower+JEF");
+byte[] bytes = encoding.GetBytes("aあb海c");
+if (Convert.ToHexString(bytes) != "8128A4A2298228B3A42983" || encoding.GetString(bytes) != "aあb海c")
+    throw new InvalidOperationException("Package smoke test failed.");
+Console.WriteLine("Package smoke test passed: " + encoding.GetString(bytes));
+if (args.Contains("--benchmark"))
+{
+    foreach (string name in new[] { "x-Fujitsu-JEF", "x-Fujitsu-EBCDIC-Lower+JEF" })
+    {
+        var e = Encoding.GetEncoding(name);
+        string text = string.Concat(Enumerable.Repeat(name.EndsWith("Lower+JEF") ? "aあb海c" : "あ海", 10000));
+        var buffer = new byte[e.GetByteCount(text)];
+        var chars = new char[text.Length];
+        e.GetBytes(text.AsSpan(), buffer); e.GetChars(buffer, chars);
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        long start = Stopwatch.GetTimestamp();
+        for (int i = 0; i < 100; i++) { e.GetBytes(text.AsSpan(), buffer); e.GetChars(buffer, chars); }
+        long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        double seconds = Stopwatch.GetElapsedTime(start).TotalSeconds;
+        Console.WriteLine($"{name}: {100.0 * buffer.Length / seconds / 1048576:F1} MiB/s encode+decode, {allocated} allocated bytes");
+    }
+}
