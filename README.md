@@ -1,6 +1,6 @@
 # Jef4Net
 
-富士通 JEF / EBCDIC を `System.Text.Encoding` として扱う .NET ライブラリです。
+富士通 JEF / EBCDIC と日立 KEIS / EBCDIC / EBCDIK を `System.Text.Encoding` として扱う .NET ライブラリです。
 **.NET Standard 2.1 / .NET 10** を対象とし、ランタイム依存パッケージはありません。
 
 ```csharp
@@ -12,6 +12,18 @@ Encoding encoding = Encoding.GetEncoding("x-Fujitsu-EBCDIC-Lower+JEF");
 byte[] bytes = encoding.GetBytes("aあb海c");
 string text = encoding.GetString(bytes);
 // bytes: 81 28 A4 A2 29 82 28 B3 A4 29 83
+```
+
+日立KEISは専用providerを登録します。
+
+```csharp
+using Jef4Net.Hitachi;
+
+Encoding.RegisterProvider(HitachiEncodingProvider.Instance);
+Encoding keis = Encoding.GetEncoding(
+    "x-Hitachi-EBCDIK+KEIS83",
+    EncoderFallback.ExceptionFallback,
+    DecoderFallback.ExceptionFallback);
 ```
 
 移行時に変換不能文字や不正データを検出する場合は例外 fallback を指定してください。
@@ -40,10 +52,23 @@ Encoding strict = Encoding.GetEncoding(
 - `x-Fujitsu-JEF+EBCDIC-{Lower|Kana|Ascii}`（3形式）
 - `x-Fujitsu-EBCDIC-{Lower|Kana|Ascii}+JEF-HanyoDenshi`（3形式）
 - `x-Fujitsu-JEF-HanyoDenshi+EBCDIC-{Lower|Kana|Ascii}`（3形式）
+- `x-Hitachi-EBCDIC` / `x-Hitachi-EBCDIK`
+- `x-Hitachi-KEIS78` / `x-Hitachi-KEIS83`
+- KEIS名に任意で `-ShiftSpaceSingle` を付加した形式
+- `x-Hitachi-{EBCDIC|EBCDIK}+{KEIS名}` と、左右を反転した形式
 
 名前の大文字・小文字は区別せず、`x-Fujitsu-` を省略した別名も使用できます。
 独自のコードページ番号は割り当てません。数値による provider 検索は `null` を返します。
 `Encoding.CodePage` の値0は識別子として利用しないでください。
+
+日立名は `x-Hitachi-` を含む正式名だけを受け付けます。混在形式は左側から開始し、
+`0A 42` でKEIS、`0A 41` でSBCSへ切り替えます。エンコードのflushでは初期状態へ
+戻ります。単体形式ではこのシフト構文を解釈しません。KEISの `4040` は通常
+`U+3000`、`ShiftSpaceSingle` では半角空白2文字へデコードします（エンコード時に
+半角空白2文字を自動合成はしません）。`81A1`～`A0FE` は `U+E000`～`U+EBBF`
+の3,008文字へ規則変換します。
+固定した日立マッピングJSONにはHanyoDenshi/IVSデータがないため、日立名の
+`-HanyoDenshi` プロファイルは受け付けません。
 
 混在形式は `+` の左側から開始します。デコードは K (`28`)、K1 (`38`)、
 K2 (`30 E2`)、A (`29`) を受け入れ、エンコードは K/A を使用します。
@@ -129,6 +154,8 @@ dotnet pack -c Release -o artifacts
 ```sh
 dotnet run --project src/Jef4Net.CodeGen -c Release -- \
   data/jef4j src/Jef4Net/Fujitsu/Internal/Generated/FujitsuTables.g.cs
+dotnet run --project src/Jef4Net.CodeGen -c Release -- \
+  data/jef4j src/Jef4Net/Hitachi/Internal/Generated/HitachiTables.g.cs hitachi
 ```
 
 テストは全JSONの通常・Roundtrip・HanyoDenshiマッピング、JEF全65,536コード、PUA全領域、
@@ -151,9 +178,12 @@ dotnet test tests/Jef4Net.Tests -c Release -p:LibraryTargetFramework=netstandard
 
 ## 非対応範囲
 
-AdobeJapan1、任意IVD、Roundtrip混在形式、利用者独自の外字テーブル、
+AdobeJapan1、KEIS拡張文字セット3、KEIS2004全体、KEIS Roundtrip、任意IVD、
+利用者独自の外字テーブル、
 富士通公式の「領域重視」変換、COPY句、PIC / COMP / COMP-3、
 COBOLレコード構造、CSVやDBへの移行処理は対象外です。
 上流JSONと既知ベクトルに対する互換性を試験しています。富士通の公式実装ではありません。
+日立KEISについても固定した上流JSON相当のベータ対応であり、実機では未検証です。
+PUA割り当ては外字の字形復元を保証しません。
 
 ライブラリ: Apache-2.0。マッピングデータ: 上流のCC0宣言に基づき利用。

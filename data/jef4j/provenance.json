@@ -7,6 +7,10 @@
     "fujitsu_ebcdic_ascii_mapping.json": "7e6d5fcfa7dca35f69d1d10a2f68f2e642c4ee4b65c3a47125033d7cf4daaea7",
     "fujitsu_ebcdic_kana_mapping.json": "fbfdc4590c9747996a3dacad10409ab3bccd0d1c81e028f69957caee7a7ddc13",
     "fujitsu_ebcdic_lower_mapping.json": "8d51e538e0611fc0b1ecaaf53e269cdab41996a0d77d1c45fbfa52659f1c7ee9",
-    "fujitsu_jef_mapping.json": "4edfaa32266a1a74f8e8fd4de2ecde3bbe4a309a9dd0db7a89cce3b749aa72dd"
+    "fujitsu_jef_mapping.json": "4edfaa32266a1a74f8e8fd4de2ecde3bbe4a309a9dd0db7a89cce3b749aa72dd",
+    "hitachi_ebcdic_mapping.json": "047c1fd9e9f3b16a2cb36dda6b9d55fbdf1ccacc88a0076e4c02d72f9ef393f9",
+    "hitachi_ebcdik_mapping.json": "b7f60e5266b4477a44bb835bcf83cdb202448fbe9967fe9a5b4340aeff7d47bd",
+    "hitachi_keis78_mapping.json": "161e4134e8d8c47e61078064b794ddb6a5606e174c7bd2ff2f875baa0b41d6f9",
+    "hitachi_keis83_mapping.json": "1bf35d3ab964e12f2d9009d9df605ec586633a8ea0c5c77eeca1949df2e49cc0"
   }
 }

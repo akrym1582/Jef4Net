@@ -1,13 +1,18 @@
 using System.Diagnostics;
 using System.Text;
 using Jef4Net.Fujitsu;
+using Jef4Net.Hitachi;
 
 Encoding.RegisterProvider(FujitsuEncodingProvider.Instance);
+Encoding.RegisterProvider(HitachiEncodingProvider.Instance);
 Encoding encoding = Encoding.GetEncoding("x-Fujitsu-EBCDIC-Lower+JEF");
 byte[] bytes = encoding.GetBytes("aあb海c");
 if (Convert.ToHexString(bytes) != "8128A4A2298228B3A42983" || encoding.GetString(bytes) != "aあb海c")
     throw new InvalidOperationException("Package smoke test failed.");
 Console.WriteLine("Package smoke test passed: " + encoding.GetString(bytes));
+Encoding keis = Encoding.GetEncoding("x-Hitachi-EBCDIC+KEIS83", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+if (Convert.ToHexString(keis.GetBytes("aあb")) != "810A42A4A20A4182" || keis.GetString(keis.GetBytes("aあb")) != "aあb")
+    throw new InvalidOperationException("KEIS package test failed.");
 Encoding roundtrip = Encoding.GetEncoding("JEF-Roundtrip", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
 if (Convert.ToHexString(roundtrip.GetBytes("あ")) != "A4A2" ||
     roundtrip.GetString(Convert.FromHexString("A4A2")) != "あ")

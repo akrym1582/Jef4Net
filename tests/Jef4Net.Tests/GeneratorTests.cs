@@ -31,4 +31,22 @@ public class GeneratorTests
         }
         finally { Directory.Delete(dir, true); }
     }
+
+    [Fact]
+    public void HitachiGeneratorRejectsUnknownSbcsDecodeConflicts()
+    {
+        string dir = Path.Combine(Path.GetTempPath(), "jef4net-hitachi-generator-" + Guid.NewGuid());
+        Directory.CreateDirectory(dir);
+        try
+        {
+            const string conflict = "[{\"code\":\"8F\",\"unicode\":\"0041\",\"options\":[]},{\"code\":\"8F\",\"unicode\":\"0042\",\"options\":[]}]";
+            const string empty = "[]";
+            File.WriteAllText(Path.Combine(dir, "hitachi_ebcdic_mapping.json"), conflict);
+            File.WriteAllText(Path.Combine(dir, "hitachi_ebcdik_mapping.json"), empty);
+            File.WriteAllText(Path.Combine(dir, "hitachi_keis78_mapping.json"), empty);
+            File.WriteAllText(Path.Combine(dir, "hitachi_keis83_mapping.json"), empty);
+            Assert.Throws<InvalidDataException>(() => HitachiMappingGenerator.Generate(dir));
+        }
+        finally { Directory.Delete(dir, true); }
+    }
 }

@@ -8,14 +8,16 @@
 - Retrieved: 2026-09-20 (UTC)
 - Files: `src/test/resources/fujitsu_jef_mapping.json`,
   `fujitsu_ebcdic_lower_mapping.json`, `fujitsu_ebcdic_kana_mapping.json`,
-  `fujitsu_ebcdic_ascii_mapping.json`
+  `fujitsu_ebcdic_ascii_mapping.json`, `hitachi_ebcdic_mapping.json`,
+  `hitachi_ebcdik_mapping.json`, `hitachi_keis78_mapping.json`, and
+  `hitachi_keis83_mapping.json`
 - Data license: CC0 / public domain dedication. Upstream README spells this
   “CC-O (Public Domain 相当)” and explicitly applies it to `src/test/resources/*.json`.
   An unmodified README snapshot is retained in `data/jef4j/UPSTREAM-README.md`.
 - Upstream author: Hidekatsu Izuno and contributors.
 
-The four JSON files are preserved verbatim. Generated `FujitsuTables.g.cs` derives
-from these files. No Java serialized `.dat` assets are used. The conversion
+The eight JSON files are preserved verbatim. Generated `FujitsuTables.g.cs` and
+`HitachiTables.g.cs` derive from these files. No Java serialized `.dat` assets are used. The conversion
 implementation is written for .NET; upstream Apache-2.0 test expectations were
 consulted to verify normal-profile selection and known conversion vectors.
 The retained upstream README is covered by upstream's Apache-2.0 license.

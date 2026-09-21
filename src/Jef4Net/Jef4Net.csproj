@@ -2,9 +2,9 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net10.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>0.2.1</Version>
+    <Version>0.3.0</Version>
     <Authors>Jef4Net contributors</Authors>
-    <Description>Fujitsu JEF and EBCDIC encodings with stateful streaming support.</Description>
+    <Description>Fujitsu JEF and Hitachi KEIS/EBCDIC encodings with stateful streaming support.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/akrym1582/Jef4Net</RepositoryUrl>
