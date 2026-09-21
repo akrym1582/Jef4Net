@@ -1,6 +1,6 @@
 # Jef4Net
 
-富士通 JEF、日立 KEIS、NEC JIPS / JIS8 / EBCDIK を `System.Text.Encoding` として扱う .NET ライブラリです。
+富士通 JEF、日立 KEIS、NEC JIPS、Unisys LETS-J など、日本のメインフレーム文字コードを `System.Text.Encoding` として扱う .NET ライブラリです。
 **.NET Standard 2.1 / .NET 10** を対象とし、ランタイム依存パッケージはありません。
 
 ```csharp
@@ -38,6 +38,16 @@ Encoding jips = Encoding.GetEncoding(
     DecoderFallback.ExceptionFallback);
 ```
 
+Unisys LETS-Jも専用providerを登録します。
+
+```csharp
+using Jef4Net.Unisys;
+
+Encoding.RegisterProvider(UnisysEncodingProvider.Instance);
+Encoding letsj = Encoding.GetEncoding("x-Unisys-LETSJ",
+    EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+```
+
 移行時に変換不能文字や不正データを検出する場合は例外 fallback を指定してください。
 
 ```csharp
@@ -72,6 +82,7 @@ Encoding strict = Encoding.GetEncoding(
 - `x-NEC-JIPSJ` / `x-NEC-JIPSE`（任意で `-HanyoDenshi`）
 - `x-NEC-JIS8+JIPSJ` / `x-NEC-JIPSJ+JIS8`（JIPS名に任意で `-HanyoDenshi`）
 - `x-NEC-EBCDIK+JIPSE` / `x-NEC-JIPSE+EBCDIK`（同上）
+- `x-Unisys-LETSJ` / `x-Unisys-LETSJ-Kanji`
 
 名前の大文字・小文字は区別せず、`x-Fujitsu-` を省略した別名も使用できます。
 独自のコードページ番号は割り当てません。数値による provider 検索は `null` を返します。
@@ -95,6 +106,18 @@ flush時は初期状態へ戻ります。シフトは混在形式だけで解釈
 この対応は固定jef4jデータ相当のベータであり、上流G1/G2は部分対応です。特にJIPS(E)外字は
 上流規則との一致のみ確認対象で、実機未検証です。NEC内部コード、AdobeJapan1、JIPS
 Roundtrip、任意外字表、COBOLレコード処理は対象外です。
+
+Unisys名は正式名だけを受け付けます。Mixed LETS-JのSBCSは `00`～`7F` の
+JISASCII（`27` → `U+2019`、`60` → `U+2018`、`5C` → `U+005C`、
+`7E` → `U+007E`）と `A1`～`DF` のJIS X 0201半角カナです。DBCSは
+JIS X 0208-1990（両バイトに`80`を加算）とJIS X 0212（第1バイトだけに
+`80`を加算）で、全角空白はcanonicalな `2020` です。`A1A1` は別名として
+受理しません。`21`～`7E`, `A1`～`FE` の利用者定義領域はfallbackに渡します。
+`93` と後続バイトは偶数ならDBCS、奇数ならSBCSへのシフトです。エンコーダーは
+`9370` / `93F1` のみを生成し、末尾にSBCS復帰を追加しません。Kanji形式は常時
+DBCSでシフトを解釈しません。本対応は公開Unisys MLS仕様、Unicode JIS mapping、
+公開実装との比較に基づき、実ClearPath検証は未完了です。特に `27` / `60` と
+`F4A5` ⇄ `U+51DC` / `F4A6` ⇄ `U+7199` は実製品未確認です。
 
 混在形式は `+` の左側から開始します。デコードは K (`28`)、K1 (`38`)、
 K2 (`30 E2`)、A (`29`) を受け入れ、エンコードは K/A を使用します。

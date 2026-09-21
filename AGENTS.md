@@ -2,7 +2,7 @@
 
 ## 対象と参照先
 
-Jef4Netは富士通JEF・EBCDICを `System.Text.Encoding` として提供するライブラリ。
+Jef4Netは富士通JEF、日立KEIS、NEC JIPS、Unisys LETS-Jを `System.Text.Encoding` として提供するライブラリ。
 ライブラリは `netstandard2.1` / `net10.0`、CodeGenとテストは `net10.0` を対象とする。
 開発には .NET 10 SDKを使用する。
 
@@ -21,8 +21,10 @@ Jef4Netは富士通JEF・EBCDICを `System.Text.Encoding` として提供する�
 | `src/Jef4Net/Fujitsu/` | Encoding、状態付きEncoder/Decoder、名前解決Provider |
 | `src/Jef4Net/Fujitsu/Internal/` | Spanを扱う変換Core、状態、マッピング参照 |
 | `src/Jef4Net/Fujitsu/Internal/Generated/` | CodeGenの生成物。直接編集しない |
+| `src/Jef4Net/Unisys/` | LETS-J Encoding、状態付きEncoder/Decoder、名前解決Provider |
 | `src/Jef4Net.CodeGen/` | JSON検証と決定的な静的テーブル生成 |
 | `data/jef4j/` | 無改変の上流データと出典情報 |
+| `data/unisys/` | LETS-J生成用JISマッピングと出典情報 |
 | `tests/Jef4Net.Tests/` | 全マッピング、分割変換、fallback、生成器の試験 |
 | `samples/PackageSmoke/` | プロジェクト参照を使わないNuGet導入試験・簡易計測 |
 

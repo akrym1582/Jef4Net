@@ -24,6 +24,17 @@ The retained upstream README is covered by upstream's Apache-2.0 license.
 
 Jef4Net's implementation is distributed under Apache-2.0; see LICENSE.
 
+## Unicode JIS mapping data
+
+- Files: `JIS0201.TXT`, `JIS0208.TXT`, `JIS0212.TXT`, `US-ASCII-QUOTES.TXT`
+- Distribution source: Unicode Character Database mapping data
+- Retrieved: 2026-09-21 (UTC)
+- License: Unicode License v3 (https://www.unicode.org/license.txt)
+
+The normalized snapshots in `data/unisys` retain the two-column mappings used by
+CodeGen. JIS X 0201 contributes kana; JIS X 0208 and JIS X 0212 are transformed
+to LETS-J byte regions. JISASCII quotes and the canonical `2020` space are explicit.
+
 The same pinned upstream commit also supplies the unmodified NEC files
 `nec_jis8_mapping.json`, `nec_ebcdik_mapping.json`,
 `nec_jis8_ebcdik_mapping.json`, and `nec_jips_mapping.json`. They are covered by
