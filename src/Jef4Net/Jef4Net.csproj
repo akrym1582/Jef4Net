@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net10.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>0.4.0</Version>
+    <Version>0.5.0</Version>
     <Authors>Jef4Net contributors</Authors>
     <Description>Fujitsu JEF, Hitachi KEIS/EBCDIC, and NEC JIPS/JIS8/EBCDIK encodings with stateful streaming support.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
