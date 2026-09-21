@@ -32,6 +32,7 @@ Jef4Netは富士通JEF・EBCDICを `System.Text.Encoding` として提供する�
 - 通常の変換経路で文字ごとのallocation、JSON解析、ファイルI/Oを追加しない。
 - 公開APIは最小限にし、追加時はXML documentationと両ターゲットの互換性を確認する。
 - マッピングの曖昧さは上流レコードと方向属性を調べて解決し、推測で文字を置き換えない。
+- `*.csproj` の `PackageReference` のバージョンは、依頼で明示されない限り更新しない。
 
 ## 作業別スキル
 
