@@ -75,7 +75,10 @@ public sealed class HitachiEncodingProvider : EncodingProvider
     private static bool TryParseKeis(string value, out int kind, out bool space, out bool hanyo)
     {
         hanyo = value.EndsWith("-HanyoDenshi", StringComparison.OrdinalIgnoreCase);
-        if (hanyo) value = value.Substring(0, value.Length - 12);
+
+        // The pinned Hitachi mapping files contain no HanyoDenshi/IVS data. Do not expose a
+        // profile that would silently behave exactly like the normal KEIS mapping.
+        if (hanyo) { kind = 0; space = false; return false; }
         space = value.EndsWith("-ShiftSpaceSingle", StringComparison.OrdinalIgnoreCase);
         if (space) value = value.Substring(0, value.Length - 17);
         if (value.Equals("KEIS78", StringComparison.OrdinalIgnoreCase)) { kind = 0; return true; }

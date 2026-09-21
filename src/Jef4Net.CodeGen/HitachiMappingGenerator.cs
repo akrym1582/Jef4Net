@@ -20,6 +20,7 @@ internal static class HitachiMappingGenerator
             using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(dataDirectory, definition.File)));
             var decode = new ulong[definition.Size];
             var encode = new SortedDictionary<ulong, int>();
+            var decodedKeys = new ulong[definition.Size];
             foreach (JsonElement record in document.RootElement.EnumerateArray())
             {
                 int code = Parse(record.GetProperty("code"));
@@ -30,11 +31,20 @@ internal static class HitachiMappingGenerator
                 if (options.Except(new[] { "compatible", "decode_only", "combination" }).Any())
                     throw new InvalidDataException($"Unknown option in {definition.File}.");
                 ulong key = (ulong)(scalar + 1) << 21;
-                // The SBCS sources intentionally repeat compatibility bytes (notably 8F/A8);
-                // their normal entry follows the compatibility alias and therefore wins.
-                if (decode[code] != 0 && decode[code] != key && definition.Size != 256)
-                    throw new InvalidDataException($"Conflicting decode {code:X4}.");
+                if (decode[code] != 0 && decode[code] != key)
+                {
+                    // The pinned upstream EBCDIC data assigns 8F to both U+FF88 and U+FF89.
+                    // Preserve its last-record decode selection, but do not emit an encoder
+                    // entry for the displaced scalar because that entry cannot round-trip.
+                    bool knownEbcdic8FConflict = definition.File == "hitachi_ebcdic_mapping.json" &&
+                        code == 0x8F && decodedKeys[code] == ((ulong)(0xFF88 + 1) << 21) &&
+                        key == ((ulong)(0xFF89 + 1) << 21);
+                    if (!knownEbcdic8FConflict)
+                        throw new InvalidDataException($"Conflicting decode {code:X4} in {definition.File}.");
+                    encode.Remove(decodedKeys[code]);
+                }
                 decode[code] = key;
+                decodedKeys[code] = key;
                 if (!options.Contains("decode_only")) encode[key] = code; // upstream JSON order wins
             }
 

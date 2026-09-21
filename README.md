@@ -21,7 +21,7 @@ using Jef4Net.Hitachi;
 
 Encoding.RegisterProvider(HitachiEncodingProvider.Instance);
 Encoding keis = Encoding.GetEncoding(
-    "x-Hitachi-EBCDIK+KEIS83-HanyoDenshi",
+    "x-Hitachi-EBCDIK+KEIS83",
     EncoderFallback.ExceptionFallback,
     DecoderFallback.ExceptionFallback);
 ```
@@ -54,7 +54,7 @@ Encoding strict = Encoding.GetEncoding(
 - `x-Fujitsu-JEF-HanyoDenshi+EBCDIC-{Lower|Kana|Ascii}`（3形式）
 - `x-Hitachi-EBCDIC` / `x-Hitachi-EBCDIK`
 - `x-Hitachi-KEIS78` / `x-Hitachi-KEIS83`
-- KEIS名に任意で `-ShiftSpaceSingle`、`-HanyoDenshi`（この順）を付加した形式
+- KEIS名に任意で `-ShiftSpaceSingle` を付加した形式
 - `x-Hitachi-{EBCDIC|EBCDIK}+{KEIS名}` と、左右を反転した形式
 
 名前の大文字・小文字は区別せず、`x-Fujitsu-` を省略した別名も使用できます。
@@ -67,6 +67,8 @@ Encoding strict = Encoding.GetEncoding(
 `U+3000`、`ShiftSpaceSingle` では半角空白2文字へデコードします（エンコード時に
 半角空白2文字を自動合成はしません）。`81A1`～`A0FE` は `U+E000`～`U+EBBF`
 の3,008文字へ規則変換します。
+固定した日立マッピングJSONにはHanyoDenshi/IVSデータがないため、日立名の
+`-HanyoDenshi` プロファイルは受け付けません。
 
 混在形式は `+` の左側から開始します。デコードは K (`28`)、K1 (`38`)、
 K2 (`30 E2`)、A (`29`) を受け入れ、エンコードは K/A を使用します。

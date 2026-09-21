@@ -11,7 +11,7 @@ public sealed class HitachiEncodingTests
     public void ProviderResolvesCanonicalNamesAndNoAliases()
     {
         string[] sbcs = { "EBCDIC", "EBCDIK" };
-        string[] keis = { "KEIS78", "KEIS83", "KEIS78-ShiftSpaceSingle", "KEIS83-ShiftSpaceSingle", "KEIS78-HanyoDenshi", "KEIS83-ShiftSpaceSingle-HanyoDenshi" };
+        string[] keis = { "KEIS78", "KEIS83", "KEIS78-ShiftSpaceSingle", "KEIS83-ShiftSpaceSingle" };
         foreach (string s in sbcs) Assert.NotNull(Encoding.GetEncoding("x-Hitachi-" + s));
         foreach (string k in keis)
         {
@@ -23,7 +23,18 @@ public sealed class HitachiEncodingTests
             }
         }
         Assert.Null(HitachiEncodingProvider.Instance.GetEncoding("KEIS83"));
+        Assert.Null(HitachiEncodingProvider.Instance.GetEncoding("x-Hitachi-KEIS78-HanyoDenshi"));
+        Assert.Null(HitachiEncodingProvider.Instance.GetEncoding("x-Hitachi-EBCDIC+KEIS83-HanyoDenshi"));
         Assert.Null(HitachiEncodingProvider.Instance.GetEncoding(12345));
+    }
+
+    [Fact]
+    public void ConflictingEbcdicAliasIsNotSilentlyEncoded()
+    {
+        Encoding encoding = Encoding.GetEncoding("x-Hitachi-EBCDIC", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+        Assert.Equal("\uFF89", encoding.GetString(new byte[] { 0x8F }));
+        Assert.Equal(new byte[] { 0x8F }, encoding.GetBytes("\uFF89"));
+        Assert.Throws<EncoderFallbackException>(() => encoding.GetBytes("\uFF88"));
     }
 
     [Theory]
