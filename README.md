@@ -1,6 +1,6 @@
 # Jef4Net
 
-富士通 JEF、日立 KEIS、NEC JIPS、IBM Japanese Host、Unisys LETS-J など、日本のメインフレーム文字コードを `System.Text.Encoding` として扱う .NET ライブラリです。
+富士通 JEF、日立 KEIS、NEC JIPS、IBM Japanese Host、Unisys LETS-J、MELCOM / JSII など、日本のメインフレーム文字コードを `System.Text.Encoding` として扱う .NET ライブラリです。
 **.NET Standard 2.1 / .NET 10** を対象とし、ランタイム依存パッケージはありません。
 
 ```csharp
@@ -59,6 +59,18 @@ Encoding letsj = Encoding.GetEncoding("x-Unisys-LETSJ",
     EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
 ```
 
+MELCOM / JSIIは、JIS世代と、必要なら外部拡張表を明示して直接生成します。
+
+```csharp
+using Jef4Net.Melcom;
+
+Encoding melcom = new MelcomEncoding(new MelcomOptions
+{
+    JisVersion = MelcomJisVersion.Jis78,
+    DecoderFallback = DecoderFallback.ExceptionFallback,
+});
+```
+
 移行時に変換不能文字や不正データを検出する場合は例外 fallback を指定してください。
 
 ```csharp
@@ -98,6 +110,8 @@ Encoding strict = Encoding.GetEncoding(
 - `x-IBM-5123+16684` / `x-IBM-16684+5123`
 - `x-IBM-1390`（8482+16684）/ `x-IBM-1399`（5123+16684）
 - `x-Unisys-LETSJ` / `x-Unisys-LETSJ-Kanji`
+- `MelcomEncoding`（JIS C 6226-1978 / JIS X 0208-1983を明示選択）
+- `MelcomMixedEncoding`（SBCS、KI、KOを利用者が明示する構成）
 
 名前の大文字・小文字は区別せず、`x-Fujitsu-` を省略した別名も使用できます。
 独自のコードページ番号は割り当てません。Fujitsu/Hitachi/NEC/Unisys providerの数値検索は `null` を返します。
@@ -139,6 +153,19 @@ JIS X 0208-1990（両バイトに`80`を加算）とJIS X 0212（第1バイト�
 DBCSでシフトを解釈しません。本対応は公開Unisys MLS仕様、Unicode JIS mapping、
 公開実装との比較に基づき、実ClearPath検証は未完了です。特に `27` / `60` と
 `F4A5` ⇄ `U+51DC` / `F4A6` ⇄ `U+7199` は実製品未確認です。
+
+MELCOM / JSIIは、両バイトが`A1`～`FE`のJIS+0x8080標準領域をサポートします。
+JIS78とJIS83は利用者が選択でき、引数なしコンストラクターのJIS83は現代環境との
+相互運用上の便宜的な既定値であって、全MELCOM機の標準がJIS83という意味ではありません。
+`IMelcomExtensionMapping`またはCSVから作成する`MelcomExtensionMapping`により、根拠を
+持つ独自文字・利用者外字だけを追加できます。混在形式ではSBCS Encodingと1～3バイトの
+KI/KOを必ず指定し、`0E`/`0F`などをMELCOMの標準値として仮定しません。
+
+公開資料から、標準JIS領域より前方のコード領域にMELCOM/JSII固有拡張が配置されていた
+可能性は示唆されていますが、三菱電機による完全な公式割り当て表は確認できていません。
+そのためJef4Netでは該当領域へのUnicode文字割り当て、IBM/CP932拡張との対応、
+顧客固有外字、機種固有KI/KOプロファイルを推測で組み込みません。未登録コードはfallbackに
+渡されます。データ移行では`ExceptionFallback`を推奨します。
 
 混在形式は `+` の左側から開始します。デコードは K (`28`)、K1 (`38`)、
 K2 (`30 E2`)、A (`29`) を受け入れ、エンコードは K/A を使用します。
