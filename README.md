@@ -49,13 +49,19 @@ byte[] ibmBytes = ibm.GetBytes("ABCあいう漢字");
 string ibmText = ibm.GetString(ibmBytes);
 ```
 
-Unisys LETS-Jも専用providerを登録します。
+Unisys LETS-JとJBISはそれぞれ専用providerを登録します。
 
 ```csharp
 using Jef4Net.Unisys;
 
 Encoding.RegisterProvider(UnisysEncodingProvider.Instance);
 Encoding letsj = Encoding.GetEncoding("x-Unisys-LETSJ",
+    EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+```
+
+```csharp
+Encoding.RegisterProvider(JbisEncodingProvider.Instance);
+Encoding jbis = Encoding.GetEncoding("japan-ebcdic-jbis8",
     EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
 ```
 
@@ -110,6 +116,8 @@ Encoding strict = Encoding.GetEncoding(
 - `x-IBM-5123+16684` / `x-IBM-16684+5123`
 - `x-IBM-1390`（8482+16684）/ `x-IBM-1399`（5123+16684）
 - `x-Unisys-LETSJ` / `x-Unisys-LETSJ-Kanji`
+- `jbis7` / `jbis8`
+- `jis-ascii-jbis7` / `japan-ebcdic-jbis8` / `japan-v24-jbis8`
 - `MelcomEncoding`（JIS C 6226-1978 / JIS X 0208-1983を明示選択）
 - `MelcomMixedEncoding`（SBCS、KI、KOを利用者が明示する構成）
 
@@ -153,6 +161,8 @@ JIS X 0208-1990（両バイトに`80`を加算）とJIS X 0212（第1バイト�
 DBCSでシフトを解釈しません。本対応は公開Unisys MLS仕様、Unicode JIS mapping、
 公開実装との比較に基づき、実ClearPath検証は未完了です。特に `27` / `60` と
 `F4A5` ⇄ `U+51DC` / `F4A6` ⇄ `U+7199` は実製品未確認です。
+
+JBISはLETS-Jとは別系統です。`jbis7`と`jbis8`は常時2バイトで、JIS X 0208はそれぞれ`21–7E / 21–7E`と`A1–FE / A1–FE`、JIS X 0212は共通の`A1–FE / 41–9E`です。Custom領域`41–9E / A1–FE`は標準Unicode対応を持たないためfallbackへ渡します。混在形式はSBCSで開始し、JISASCII形式は`9E`/`9F`、JapanEBCDIC/JapanV24形式は`2B`/`2C`でDBCSへ出入りします。エンコーダーは連続DBCSを一度だけshiftし、flush時にEDOを出力します。デコーダーはEDOなしの終端を不正シーケンスとして扱います。参照表と出典は`data/jbis/JBIS_Unisys_MLS_reference.md`および同名JSONに保持しています。
 
 MELCOM / JSIIは、両バイトが`A1`～`FE`のJIS+0x8080標準領域をサポートします。
 JIS78とJIS83は利用者が選択でき、引数なしコンストラクターのJIS83は現代環境との

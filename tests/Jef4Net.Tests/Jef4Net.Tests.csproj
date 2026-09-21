@@ -7,6 +7,7 @@
     <ProjectReference Include="../../src/Jef4Net/Jef4Net.csproj" SetTargetFramework="TargetFramework=$(LibraryTargetFramework)" />
     <ProjectReference Include="../../src/Jef4Net.CodeGen/Jef4Net.CodeGen.csproj" />
     <None Include="../../data/jef4j/*mapping.json" Link="data/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../data/jbis/*.json" Link="data/jbis/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../data/unisys/*.TXT" Link="data/unisys/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../data/icu/ibm/*.ucm" Link="data/icu/ibm/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Using Include="Xunit" />

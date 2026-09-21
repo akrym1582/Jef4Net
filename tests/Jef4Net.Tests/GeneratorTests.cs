@@ -19,6 +19,13 @@ public class GeneratorTests
     }
 
     [Fact]
+    public void JbisRealDataIsDeterministic()
+    {
+        string data = Path.Combine(AppContext.BaseDirectory, "data", "jbis");
+        Assert.Equal(JbisMappingGenerator.Generate(data), JbisMappingGenerator.Generate(data));
+    }
+
+    [Fact]
     public void IbmRealDataIsDeterministic()
     {
         string data = Path.Combine(AppContext.BaseDirectory, "data", "icu", "ibm");
