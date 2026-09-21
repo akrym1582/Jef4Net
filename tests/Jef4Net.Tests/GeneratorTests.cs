@@ -10,6 +10,13 @@ public class GeneratorTests
         string data = Path.Combine(AppContext.BaseDirectory, "data");
         Assert.Equal(MappingGenerator.Generate(data), MappingGenerator.Generate(data));
     }
+
+    [Fact]
+    public void UnisysRealDataIsDeterministic()
+    {
+        string data = Path.Combine(AppContext.BaseDirectory, "data", "unisys");
+        Assert.Equal(UnisysMappingGenerator.Generate(data), UnisysMappingGenerator.Generate(data));
+    }
     [Theory]
     [InlineData("[{\"code\":\"10000\",\"unicode\":\"0041\",\"options\":[]}]")]
     [InlineData("[{\"code\":\"4040\",\"unicode\":\"110000\",\"options\":[]}]")]

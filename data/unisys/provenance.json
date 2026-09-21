@@ -1,0 +1,9 @@
+{
+  "vendorSpecification": { "vendor": "Unisys", "title": "MultiLingual System (MLS) Administration, Operations, and Programming Guide", "documentNumber": "8600 0288-305" },
+  "mappings": {
+    "jis0201": { "source": "Unicode JIS0201.TXT", "retrieved_at": "2026-09-21", "version": "JIS X 0201", "sha256": "21c1a4e05e7264b47f8890cf7543cc260ba6472fe3163583e596750ad2cae4b8", "license": "Unicode License v3" },
+    "jis0208": { "source": "Unicode JIS0208.TXT", "retrieved_at": "2026-09-21", "version": "JIS X 0208-1990", "sha256": "316862f94ed196bb348267e7b1c5676177f06e80f564f157e878b0fc968dcec8", "license": "Unicode License v3" },
+    "jis0212": { "source": "Unicode JIS0212.TXT", "retrieved_at": "2026-09-21", "version": "JIS X 0212-1990", "sha256": "3ea52145ad5f885422478e620af3340abccf5735bc151c2e8e4a777ed69b1a10", "license": "Unicode License v3" },
+    "asciiQuotes": { "source": "Unicode US-ASCII-QUOTES.TXT", "retrieved_at": "2026-09-21", "version": "LETS-J quote profile", "sha256": "021a2f5ae774e278761cfaa92f41420bee22802dc0e45e05335da545019f06dd", "license": "Unicode License v3" }
+  }
+}
