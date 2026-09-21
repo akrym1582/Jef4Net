@@ -3,6 +3,19 @@
 富士通 JEF、日立 KEIS、NEC JIPS、IBM Japanese Host、Unisys LETS-J、MELCOM / JSII など、日本のメインフレーム文字コードを `System.Text.Encoding` として扱う .NET ライブラリです。
 **.NET Standard 2.1 / .NET 10** を対象とし、ランタイム依存パッケージはありません。
 
+すべての名前付きエンコーディングを利用する場合は、まとめて登録できるproviderを使用します。
+
+```csharp
+using System.Text;
+using Jef4Net;
+
+Encoding.RegisterProvider(Jef4NetEncodingProvider.Instance);
+Encoding encoding = Encoding.GetEncoding("x-Fujitsu-EBCDIC-Lower+JEF");
+```
+
+MELCOM / JSIIは構築時にJIS世代や外部拡張表を指定するため、このproviderの対象外です。
+個別のproviderを登録する方法も引き続き利用できます。
+
 ```csharp
 using System.Text;
 using Jef4Net.Fujitsu;
