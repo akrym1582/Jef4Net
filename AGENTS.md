@@ -32,6 +32,7 @@ Jef4Netは富士通JEF・EBCDICを `System.Text.Encoding` として提供する�
 - 通常の変換経路で文字ごとのallocation、JSON解析、ファイルI/Oを追加しない。
 - 公開APIは最小限にし、追加時はXML documentationと両ターゲットの互換性を確認する。
 - マッピングの曖昧さは上流レコードと方向属性を調べて解決し、推測で文字を置き換えない。
+- `*.csproj` の `<Version>` タグは、依頼で明示されない限り更新しない。
 
 ## 作業別スキル
 
@@ -61,7 +62,7 @@ dotnet test tests/Jef4Net.Tests -c Release --no-restore -p:LibraryTargetFramewor
 パッケージ構成を変更した場合は `dotnet pack -c Release -o artifacts` と
 READMEのPackageSmoke手順で確認する。ローカルで同じバージョンを再作成した場合は、
 試験用の新しい `NUGET_PACKAGES` ディレクトリを使い、以前のパッケージのキャッシュを避ける。
-バージョンを変更するときはPackageSmokeのPackageReferenceも揃える。
+バージョンを変更するときは中央管理のPackageVersionとPackageSmokeの参照も揃える。
 
 環境がホームへの書込みを制限する場合は、`DOTNET_CLI_HOME` と `NUGET_PACKAGES` を
 書込み可能な場所へ設定する。MSBuildやコンパイラーサーバーの制約がある場合は
