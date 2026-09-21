@@ -23,3 +23,10 @@ consulted to verify normal-profile selection and known conversion vectors.
 The retained upstream README is covered by upstream's Apache-2.0 license.
 
 Jef4Net's implementation is distributed under Apache-2.0; see LICENSE.
+
+The same pinned upstream commit also supplies the unmodified NEC files
+`nec_jis8_mapping.json`, `nec_ebcdik_mapping.json`,
+`nec_jis8_ebcdik_mapping.json`, and `nec_jips_mapping.json`. They are covered by
+the CC0 declaration above. `NecTables.g.cs` is generated from them; the Apache-2.0
+Java NEC encoder/decoder were consulted for byte-shift and profile behavior, but
+no Java code or serialized `.dat` file is included.

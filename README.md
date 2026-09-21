@@ -1,6 +1,6 @@
 # Jef4Net
 
-富士通 JEF / EBCDIC と日立 KEIS / EBCDIC / EBCDIK を `System.Text.Encoding` として扱う .NET ライブラリです。
+富士通 JEF、日立 KEIS、NEC JIPS / JIS8 / EBCDIK を `System.Text.Encoding` として扱う .NET ライブラリです。
 **.NET Standard 2.1 / .NET 10** を対象とし、ランタイム依存パッケージはありません。
 
 ```csharp
@@ -22,6 +22,18 @@ using Jef4Net.Hitachi;
 Encoding.RegisterProvider(HitachiEncodingProvider.Instance);
 Encoding keis = Encoding.GetEncoding(
     "x-Hitachi-EBCDIK+KEIS83",
+    EncoderFallback.ExceptionFallback,
+    DecoderFallback.ExceptionFallback);
+```
+
+NEC JIPSも専用providerを登録します。
+
+```csharp
+using Jef4Net.Nec;
+
+Encoding.RegisterProvider(NecEncodingProvider.Instance);
+Encoding jips = Encoding.GetEncoding(
+    "x-NEC-EBCDIK+JIPSE-HanyoDenshi",
     EncoderFallback.ExceptionFallback,
     DecoderFallback.ExceptionFallback);
 ```
@@ -56,6 +68,10 @@ Encoding strict = Encoding.GetEncoding(
 - `x-Hitachi-KEIS78` / `x-Hitachi-KEIS83`
 - KEIS名に任意で `-ShiftSpaceSingle` を付加した形式
 - `x-Hitachi-{EBCDIC|EBCDIK}+{KEIS名}` と、左右を反転した形式
+- `x-NEC-JIS8` / `x-NEC-EBCDIK`
+- `x-NEC-JIPSJ` / `x-NEC-JIPSE`（任意で `-HanyoDenshi`）
+- `x-NEC-JIS8+JIPSJ` / `x-NEC-JIPSJ+JIS8`（JIPS名に任意で `-HanyoDenshi`）
+- `x-NEC-EBCDIK+JIPSE` / `x-NEC-JIPSE+EBCDIK`（同上）
 
 名前の大文字・小文字は区別せず、`x-Fujitsu-` を省略した別名も使用できます。
 独自のコードページ番号は割り当てません。数値による provider 検索は `null` を返します。
@@ -69,6 +85,16 @@ Encoding strict = Encoding.GetEncoding(
 の3,008文字へ規則変換します。
 固定した日立マッピングJSONにはHanyoDenshi/IVSデータがないため、日立名の
 `-HanyoDenshi` プロファイルは受け付けません。
+
+NEC名は `x-NEC-` を含む正式名だけを受け付け、混在形式の左側を初期状態とします。
+J形式は `1A 70` / `1A 71`、E形式は `3F 75` / `3F 76` でJIPS/SBCSへ切り替え、
+flush時は初期状態へ戻ります。シフトは混在形式だけで解釈します。JIPS(E)は固定上流の
+専用JIS8/EBCDIKバイト表を各漢字バイトに適用します。G0 `7421`～`7E7E` とG1
+`E0A1`～`FEFE` の合計3,948枠を `U+E000`～`U+EF6B`（連続範囲間に隙間あり）へ
+規則変換します。通常プロファイルはIVSを抑制し、HanyoDenshiは上流の `hd` を出力します。
+この対応は固定jef4jデータ相当のベータであり、上流G1/G2は部分対応です。特にJIPS(E)外字は
+上流規則との一致のみ確認対象で、実機未検証です。NEC内部コード、AdobeJapan1、JIPS
+Roundtrip、任意外字表、COBOLレコード処理は対象外です。
 
 混在形式は `+` の左側から開始します。デコードは K (`28`)、K1 (`38`)、
 K2 (`30 E2`)、A (`29`) を受け入れ、エンコードは K/A を使用します。
@@ -156,6 +182,8 @@ dotnet run --project src/Jef4Net.CodeGen -c Release -- \
   data/jef4j src/Jef4Net/Fujitsu/Internal/Generated/FujitsuTables.g.cs
 dotnet run --project src/Jef4Net.CodeGen -c Release -- \
   data/jef4j src/Jef4Net/Hitachi/Internal/Generated/HitachiTables.g.cs hitachi
+dotnet run --project src/Jef4Net.CodeGen -c Release -- \
+  data/jef4j src/Jef4Net/Nec/Internal/Generated/NecTables.g.cs nec
 ```
 
 テストは全JSONの通常・Roundtrip・HanyoDenshiマッピング、JEF全65,536コード、PUA全領域、
