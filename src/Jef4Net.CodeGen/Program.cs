@@ -1,13 +1,15 @@
 using System.Text;
 using Jef4Net.CodeGen;
 
-if (args.Length is < 2 or > 3) throw new ArgumentException("Usage: Jef4Net.CodeGen <data directory> <output.cs> [fujitsu|hitachi]");
+if (args.Length is < 2 or > 3) throw new ArgumentException("Usage: Jef4Net.CodeGen <data directory> <output.cs> [fujitsu|hitachi|nec]");
 string target = args.Length == 3 ? args[2] : "fujitsu";
-string output = target.Equals("hitachi", StringComparison.OrdinalIgnoreCase)
+string output = target.Equals("nec", StringComparison.OrdinalIgnoreCase)
+    ? NecMappingGenerator.Generate(args[0])
+    : target.Equals("hitachi", StringComparison.OrdinalIgnoreCase)
     ? HitachiMappingGenerator.Generate(args[0])
     : target.Equals("fujitsu", StringComparison.OrdinalIgnoreCase)
         ? MappingGenerator.Generate(args[0])
-        : throw new ArgumentException("Target must be fujitsu or hitachi.");
+        : throw new ArgumentException("Target must be fujitsu, hitachi, or nec.");
 Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(args[1]))!);
 File.WriteAllText(args[1], output, new UTF8Encoding(false));
 Console.WriteLine($"Generated {args[1]}");

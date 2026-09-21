@@ -11,6 +11,10 @@
     "hitachi_ebcdic_mapping.json": "047c1fd9e9f3b16a2cb36dda6b9d55fbdf1ccacc88a0076e4c02d72f9ef393f9",
     "hitachi_ebcdik_mapping.json": "b7f60e5266b4477a44bb835bcf83cdb202448fbe9967fe9a5b4340aeff7d47bd",
     "hitachi_keis78_mapping.json": "161e4134e8d8c47e61078064b794ddb6a5606e174c7bd2ff2f875baa0b41d6f9",
-    "hitachi_keis83_mapping.json": "1bf35d3ab964e12f2d9009d9df605ec586633a8ea0c5c77eeca1949df2e49cc0"
+    "hitachi_keis83_mapping.json": "1bf35d3ab964e12f2d9009d9df605ec586633a8ea0c5c77eeca1949df2e49cc0",
+    "nec_jis8_mapping.json": "7f520bf36a7750eaf1b76a03eed399d5a1f124138f506727881b1bc5fc52505f",
+    "nec_ebcdik_mapping.json": "fa514675b866b71562cc1ab3831cc6643ef76de51a008768ec8d5f3a6b419209",
+    "nec_jis8_ebcdik_mapping.json": "dacf8dd8c03ec4a8099cb4068bee64a60cd18e1164690630521209c96176862d",
+    "nec_jips_mapping.json": "86e4955485cdac1a52792b429cc5f968e27f4e801a08eee591f334dae92d3dd0"
   }
 }
