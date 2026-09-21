@@ -21,7 +21,6 @@ internal static class JbisDecoderCore
             if (state.Pending != 0)
             {
                 byte first = (byte)(state.Pending - 1), second = input[used++]; state.Pending = 0;
-                if (second == config.Edo || second == config.Sdo) { Replace(fallback, ref state, new[] { first, second }, used - 2); continue; }
                 int scalar = Mapping.DecodeDbcs(config.Dbcs, (first << 8) | second);
                 if (scalar < 0) Replace(fallback, ref state, new[] { first, second }, used - 2);
                 else if (count || written < output.Length) { if (!count) output[written] = (char)scalar; written++; }

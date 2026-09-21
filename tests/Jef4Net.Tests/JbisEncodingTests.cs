@@ -46,6 +46,21 @@ public sealed class JbisEncodingTests
         Assert.Throws<DecoderFallbackException>(() => Strict("jis-ascii-jbis7").GetString(new byte[] { 0x9E, 0x24, 0x22 }));
     }
 
+    [Fact]
+    public void ShiftByteCanBeAValidDbcsTrail()
+    {
+        Encoding encoding = Strict("jis-ascii-jbis7"); byte[] bytes = { 0x9E, 0xA7, 0x9E, 0x9F };
+        Assert.Equal("\u045F", encoding.GetString(bytes)); Assert.Equal(bytes, encoding.GetBytes("\u045F"));
+
+        for (int split = 0; split <= bytes.Length; split++)
+        {
+            Decoder decoder = encoding.GetDecoder(); char[] output = new char[1];
+            int count = decoder.GetChars(bytes, 0, split, output, 0, false);
+            count += decoder.GetChars(bytes, split, bytes.Length - split, output, count, true);
+            Assert.Equal(1, count); Assert.Equal('\u045F', output[0]);
+        }
+    }
+
     [Theory]
     [InlineData("jbis7", "21")]
     [InlineData("jbis8", "A1")]
