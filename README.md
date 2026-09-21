@@ -1,6 +1,6 @@
 # Jef4Net
 
-富士通 JEF、日立 KEIS、NEC JIPS、Unisys LETS-J など、日本のメインフレーム文字コードを `System.Text.Encoding` として扱う .NET ライブラリです。
+富士通 JEF、日立 KEIS、NEC JIPS、IBM Japanese Host、Unisys LETS-J など、日本のメインフレーム文字コードを `System.Text.Encoding` として扱う .NET ライブラリです。
 **.NET Standard 2.1 / .NET 10** を対象とし、ランタイム依存パッケージはありません。
 
 ```csharp
@@ -36,6 +36,17 @@ Encoding jips = Encoding.GetEncoding(
     "x-NEC-EBCDIK+JIPSE-HanyoDenshi",
     EncoderFallback.ExceptionFallback,
     DecoderFallback.ExceptionFallback);
+```
+
+IBM Japanese Hostも専用providerを登録します。
+
+```csharp
+using Jef4Net.Ibm;
+
+Encoding.RegisterProvider(IbmEncodingProvider.Instance);
+Encoding ibm = Encoding.GetEncoding("x-IBM-1390");
+byte[] ibmBytes = ibm.GetBytes("ABCあいう漢字");
+string ibmText = ibm.GetString(ibmBytes);
 ```
 
 Unisys LETS-Jも専用providerを登録します。
@@ -82,11 +93,21 @@ Encoding strict = Encoding.GetEncoding(
 - `x-NEC-JIPSJ` / `x-NEC-JIPSE`（任意で `-HanyoDenshi`）
 - `x-NEC-JIS8+JIPSJ` / `x-NEC-JIPSJ+JIS8`（JIPS名に任意で `-HanyoDenshi`）
 - `x-NEC-EBCDIK+JIPSE` / `x-NEC-JIPSE+EBCDIK`（同上）
+- `x-IBM-8482` / `x-IBM-5123` / `x-IBM-16684`
+- `x-IBM-8482+16684` / `x-IBM-16684+8482`
+- `x-IBM-5123+16684` / `x-IBM-16684+5123`
+- `x-IBM-1390`（8482+16684）/ `x-IBM-1399`（5123+16684）
 - `x-Unisys-LETSJ` / `x-Unisys-LETSJ-Kanji`
 
 名前の大文字・小文字は区別せず、`x-Fujitsu-` を省略した別名も使用できます。
-独自のコードページ番号は割り当てません。数値による provider 検索は `null` を返します。
+独自のコードページ番号は割り当てません。Fujitsu/Hitachi/NEC/Unisys providerの数値検索は `null` を返します。
 `Encoding.CodePage` の値0は識別子として利用しないでください。
+
+IBM名は `x-IBM-` を含む正式名を受け付けます。1390/1399および各component CCSIDは
+数値によるprovider検索にも対応します。混在形式は左側を初期状態とし、`0E` (SO) で
+DBCS、`0F` (SI) でSBCSへ切り替えます。エンコード時はSBCSを優先し、flush時は初期状態へ
+戻します。16684は補助平面、2 scalar sequence、およびICU定義のPUAを含みます。
+互換入力名の11684も受理しますが、公開名と文書ではIBMのCCSID 16684を使用します。
 
 日立名は `x-Hitachi-` を含む正式名だけを受け付けます。混在形式は左側から開始し、
 `0A 42` でKEIS、`0A 41` でSBCSへ切り替えます。エンコードのflushでは初期状態へ
@@ -127,7 +148,7 @@ EBCDIC制御文字を通常文字としてエンコードする場合は fallbac
 
 ## マッピングと fallback
 
-マッピングは jef4j 0.14.2 の固定コミットに由来します。出典とライセンスは
+Fujitsu/Hitachi/NECマッピングは jef4j 0.14.2、IBMマッピングは固定したICU UCMに由来します。出典とライセンスは
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) を参照してください。
 ランタイムでJSON解析やファイル読み込みは行いません。
 
