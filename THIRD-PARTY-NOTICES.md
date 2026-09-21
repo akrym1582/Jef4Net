@@ -55,3 +55,15 @@ The same pinned upstream commit also supplies the unmodified NEC files
 the CC0 declaration above. `NecTables.g.cs` is generated from them; the Apache-2.0
 Java NEC encoder/decoder were consulted for byte-shift and profile behavior, but
 no Java code or serialized `.dat` file is included.
+
+## Unisys JBIS specification reference
+
+- Specification: Unisys *MultiLingual System (MLS) Administration, Operations, and Programming Guide*
+- ClearPath MCP release: 7.0 (November 2001)
+- Document: 8600 0288-305, sections 12 and 13
+- Repository reference: `data/jbis/JBIS_Unisys_MLS_reference.md` and `.json`
+
+The repository files are a structured implementation reference for the JBIS byte
+layouts, shift controls, and Section 12 SBCS cells; they are not a copy of the
+Unisys manual. JIS scalar mappings reuse the pinned Unicode mapping data described
+above. Generated runtime tables contain only numeric mapping facts.
