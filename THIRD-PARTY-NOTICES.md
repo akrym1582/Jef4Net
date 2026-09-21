@@ -1,5 +1,19 @@
 # Third-party notices
 
+## ICU IBM converter mapping data
+
+- Upstream: https://github.com/unicode-org/icu-data
+- Commit: `1c3d36e741bd648caaaba3a744267b23ca41bfc1`
+- Retrieved: 2026-09-21 (UTC)
+- Files: `charset/data/ucm/ibm-1390_P110-2003.ucm` and
+  `charset/data/ucm/ibm-1399_P110-2003.ucm`
+- License: Unicode License v3 (retained as `data/icu/ibm/LICENSE`)
+
+The UCM snapshots are retained verbatim. CodeGen separates their SBCS 8482/5123
+and common DBCS 16684 mappings into static tables. ICU is not a runtime dependency.
+Precision indicators are preserved during parsing; normal tables use round-trip
+mappings plus their explicitly directed decode-only or encode-only mappings.
+
 ## jef4j mapping data
 
 - Upstream: https://github.com/hidekatsu-izuno/jef4j

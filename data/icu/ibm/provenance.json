@@ -1,0 +1,10 @@
+{
+  "repository": "https://github.com/unicode-org/icu-data",
+  "commit": "1c3d36e741bd648caaaba3a744267b23ca41bfc1",
+  "retrievedAt": "2026-09-21",
+  "license": "Unicode License v3",
+  "files": [
+    { "file": "charset/data/ucm/ibm-1390_P110-2003.ucm", "sha256": "bb5e49b96693b90a4d35654df5af128b5193ab6da1f5ff34db88ad47ca5a63ce" },
+    { "file": "charset/data/ucm/ibm-1399_P110-2003.ucm", "sha256": "fd3739a75d7a368f632455bec2260e1585bd873faae57c564d19891e0948b4e2" }
+  ]
+}

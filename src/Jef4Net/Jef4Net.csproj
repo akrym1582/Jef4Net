@@ -4,7 +4,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Version>0.6.0</Version>
     <Authors>Jef4Net contributors</Authors>
-    <Description>Fujitsu JEF, Hitachi KEIS/EBCDIC, and NEC JIPS/JIS8/EBCDIK encodings with stateful streaming support.</Description>
+    <Description>Fujitsu JEF, Hitachi KEIS, NEC JIPS, IBM Japanese Host, and Unisys LETS-J encodings with stateful streaming support.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/akrym1582/Jef4Net</RepositoryUrl>
