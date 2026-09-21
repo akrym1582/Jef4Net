@@ -5,7 +5,7 @@
     <Version>0.8.0</Version>
     <Authors>Jef4Net contributors</Authors>
     <Description>Fujitsu JEF, Hitachi KEIS, NEC JIPS, IBM Japanese Host, Unisys LETS-J/JBIS, and MELCOM/JSII encodings.</Description>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/akrym1582/Jef4Net</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -21,6 +21,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="/" />
     <None Include="../../THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="/" />
+    <None Include="../../licenses/Apache-2.0.txt" Pack="true" PackagePath="licenses/" />
+    <None Include="../../licenses/Unicode-ICU.txt" Pack="true" PackagePath="licenses/" />
   </ItemGroup>
 </Project>
