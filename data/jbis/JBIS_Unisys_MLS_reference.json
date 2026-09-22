@@ -9,7 +9,9 @@
     "sections": [
       "12",
       "13"
-    ]
+    ],
+    "pageOrTableLocators": null,
+    "locatorStatus": "Unresolved: repository history does not contain page or table numbers or a stable original-manual URL."
   },
   "byteLayouts": {
     "jbis7": {
@@ -650,5 +652,8 @@
       "FF": "009F"
     }
   },
-  "referenceShare": "https://chatgpt.com/share/6ab131c7-4348-83ee-b53c-97f4fa4cbfbb?ogimg=plain"
+  "researchLead": {
+    "url": "https://chatgpt.com/share/6ab131c7-4348-83ee-b53c-97f4fa4cbfbb?ogimg=plain",
+    "authority": "non-authoritative; not a primary source"
+  }
 }

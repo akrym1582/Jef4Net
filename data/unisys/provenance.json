@@ -1,9 +1,68 @@
 {
-  "vendorSpecification": { "vendor": "Unisys", "title": "MultiLingual System (MLS) Administration, Operations, and Programming Guide", "documentNumber": "8600 0288-305" },
-  "mappings": {
-    "jis0201": { "source": "Unicode JIS0201.TXT", "retrieved_at": "2026-09-21", "version": "JIS X 0201", "sha256": "21c1a4e05e7264b47f8890cf7543cc260ba6472fe3163583e596750ad2cae4b8", "license": "Unicode License v3" },
-    "jis0208": { "source": "Unicode JIS0208.TXT", "retrieved_at": "2026-09-21", "version": "JIS X 0208-1990", "sha256": "316862f94ed196bb348267e7b1c5676177f06e80f564f157e878b0fc968dcec8", "license": "Unicode License v3" },
-    "jis0212": { "source": "Unicode JIS0212.TXT", "retrieved_at": "2026-09-21", "version": "JIS X 0212-1990", "sha256": "3ea52145ad5f885422478e620af3340abccf5735bc151c2e8e4a777ed69b1a10", "license": "Unicode License v3" },
-    "asciiQuotes": { "source": "Unicode US-ASCII-QUOTES.TXT", "retrieved_at": "2026-09-21", "version": "LETS-J quote profile", "sha256": "021a2f5ae774e278761cfaa92f41420bee22802dc0e45e05335da545019f06dd", "license": "Unicode License v3" }
-  }
+  "schema_version": 2,
+  "status": "unresolved",
+  "history": {
+    "introduced_in": "0f1bed09bac9a1982fa2773a85d0b415675f41a0",
+    "note": "The introducing commit contains normalized snapshots but no download URL, upstream headers, raw files, or normalization program. Repository history therefore cannot establish that these bytes came from Unicode, nor which historical terms apply."
+  },
+  "vendor_specification": {
+    "vendor": "Unisys",
+    "title": "MultiLingual System (MLS) Administration, Operations, and Programming Guide",
+    "document_number": "8600 0288-305",
+    "release": "ClearPath MCP 7.0",
+    "publication_date": "2001-11",
+    "sections": ["12", "13"],
+    "page_or_table": null,
+    "status": "A copy with stable page/table locators was not available for this audit."
+  },
+  "mappings": [
+    {
+      "file": "JIS0201.TXT",
+      "source_url": null,
+      "upstream_filename": "JIS0201.TXT (claimed by the introducing metadata; not independently verified)",
+      "upstream_version": null,
+      "retrieved_at": "2026-09-21 (value recorded by the introducing commit; download not evidenced)",
+      "upstream_sha256": null,
+      "normalized_sha256": "21c1a4e05e7264b47f8890cf7543cc260ba6472fe3163583e596750ad2cae4b8",
+      "license": "UNRESOLVED; do not infer Unicode-3.0 from the filename",
+      "copyright_notice": null,
+      "transform": "Unknown. The stored file is a header plus a two-column kana subset; upstream comments/metadata are absent."
+    },
+    {
+      "file": "JIS0208.TXT",
+      "source_url": null,
+      "upstream_filename": "JIS0208.TXT (claimed by the introducing metadata; not independently verified)",
+      "upstream_version": "Claimed JIS X 0208-1990; not independently verified",
+      "retrieved_at": "2026-09-21 (value recorded by the introducing commit; download not evidenced)",
+      "upstream_sha256": null,
+      "normalized_sha256": "316862f94ed196bb348267e7b1c5676177f06e80f564f157e878b0fc968dcec8",
+      "license": "UNRESOLVED; do not infer Unicode-3.0 from the filename",
+      "copyright_notice": null,
+      "transform": "Unknown normalization and at least one unexplained value difference: stored JIS 0x2140 is U+FF3C, while the Unicode mapping identified in the audit request has U+005C. No evidence establishes a LETS-J/JBIS override or its source. Value retained for compatibility."
+    },
+    {
+      "file": "JIS0212.TXT",
+      "source_url": null,
+      "upstream_filename": "JIS0212.TXT (claimed by the introducing metadata; not independently verified)",
+      "upstream_version": "Claimed JIS X 0212-1990; not independently verified",
+      "retrieved_at": "2026-09-21 (value recorded by the introducing commit; download not evidenced)",
+      "upstream_sha256": null,
+      "normalized_sha256": "3ea52145ad5f885422478e620af3340abccf5735bc151c2e8e4a777ed69b1a10",
+      "license": "UNRESOLVED; do not infer Unicode-3.0 from the filename",
+      "copyright_notice": null,
+      "transform": "Unknown. The stored file is a header plus two-column records; upstream comments/metadata are absent."
+    },
+    {
+      "file": "US-ASCII-QUOTES.TXT",
+      "source_url": null,
+      "upstream_filename": null,
+      "upstream_version": null,
+      "retrieved_at": "2026-09-21 (introducing commit date metadata only)",
+      "upstream_sha256": null,
+      "normalized_sha256": "021a2f5ae774e278761cfaa92f41420bee22802dc0e45e05335da545019f06dd",
+      "license": "UNRESOLVED; Unicode provenance and Unicode-3.0 applicability are not established",
+      "copyright_notice": null,
+      "transform": "The file labels itself as LETS-J quote overrides and contains only 0x27→U+2019 and 0x60→U+2018. No upstream file, author notice, individual terms, or derivation was recorded."
+    }
+  ]
 }

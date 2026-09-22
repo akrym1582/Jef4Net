@@ -2,7 +2,16 @@
 
 This repository snapshot records the byte layouts and SBCS cells used to generate the JBIS implementation. Its primary specification is Unisys *MultiLingual System (MLS) Administration, Operations, and Programming Guide*, ClearPath MCP 7.0, November 2001, document 8600 0288-305, sections 12–13.
 
-The supplied [shared implementation reference](https://chatgpt.com/share/6ab131c7-4348-83ee-b53c-97f4fa4cbfbb?ogimg=plain) was normalized into this repository. The machine-readable companion is [`JBIS_Unisys_MLS_reference.json`](JBIS_Unisys_MLS_reference.json). JIS-to-Unicode scalar values are not duplicated there: CodeGen consumes the pinned Unicode `JIS0208.TXT` and `JIS0212.TXT` snapshots in `data/unisys`.
+The machine-readable companion is [`JBIS_Unisys_MLS_reference.json`](JBIS_Unisys_MLS_reference.json). JIS-to-Unicode scalar values are not duplicated there: CodeGen consumes the JIS snapshots in `data/unisys`, whose provenance remains unresolved.
+
+Repository history contains no stable original-manual URL and no page or table
+numbers for the extracted values. Sections 12 and 13 are therefore the narrowest
+currently verified locators. A ChatGPT shared conversation used during the
+initial implementation is retained in the JSON only as a non-authoritative
+research lead; it is not treated as a source. Before adding or correcting
+values, inspect an authorized copy of document 8600 0288-305 and record the
+page/table locator for each JSON section. No manual prose, headings, figures, or
+PDF are intentionally reproduced here.
 
 ## DBCS layouts
 

@@ -18,9 +18,12 @@ jobs:
       - run: dotnet test tests/Jef4Net.Tests -c Release --no-restore -p:LibraryTargetFramework=netstandard2.1
       - name: Verify generated tables
         run: |
-          dotnet run --project src/Jef4Net.CodeGen -c Release --no-build -- data/jef4j src/Jef4Net/Fujitsu/Internal/Generated/FujitsuTables.g.cs
-          git diff --exit-code -- src/Jef4Net/Fujitsu/Internal/Generated/FujitsuTables.g.cs
+          scripts/verify-generated.sh
+      - name: Verify source provenance hashes
+        run: scripts/verify-provenance.py
       - run: dotnet pack -c Release --no-build --no-restore -o artifacts
+      - name: Verify package license contents
+        run: scripts/verify-package.py artifacts/*.nupkg
       - run: dotnet restore samples/PackageSmoke --source "${{ github.workspace }}/artifacts"
       - run: dotnet run --project samples/PackageSmoke -c Release --no-restore
       - uses: actions/upload-artifact@v4
