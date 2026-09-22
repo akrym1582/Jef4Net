@@ -16,5 +16,108 @@
     "nec_ebcdik_mapping.json": "fa514675b866b71562cc1ab3831cc6643ef76de51a008768ec8d5f3a6b419209",
     "nec_jis8_ebcdik_mapping.json": "dacf8dd8c03ec4a8099cb4068bee64a60cd18e1164690630521209c96176862d",
     "nec_jips_mapping.json": "86e4955485cdac1a52792b429cc5f968e27f4e801a08eee591f334dae92d3dd0"
-  }
+  },
+  "license_scope": {
+    "upstream_statement": "The pinned README states that mapping files are distributed as CC-O (Public Domain 相当).",
+    "verified_scope": "All 12 files used here are byte-identical files under upstream src/test/resources/*.json at the pinned commit.",
+    "legal_characterization": "This records the upstream statement; Jef4Net does not independently characterize its legal effect."
+  },
+  "files": [
+    {
+      "file": "fujitsu_ebcdic_ascii_mapping.json",
+      "source_url": "https://raw.githubusercontent.com/hidekatsu-izuno/jef4j/40d13b0d92963c9b36993d1d742cdfc10c25b0f6/src/test/resources/fujitsu_ebcdic_ascii_mapping.json",
+      "upstream_path": "src/test/resources/fujitsu_ebcdic_ascii_mapping.json",
+      "upstream_sha256": "7e6d5fcfa7dca35f69d1d10a2f68f2e642c4ee4b65c3a47125033d7cf4daaea7",
+      "repository_sha256": "7e6d5fcfa7dca35f69d1d10a2f68f2e642c4ee4b65c3a47125033d7cf4daaea7",
+      "transform": "none; retained byte-for-byte (CodeGen separately derives static tables)"
+    },
+    {
+      "file": "fujitsu_ebcdic_kana_mapping.json",
+      "source_url": "https://raw.githubusercontent.com/hidekatsu-izuno/jef4j/40d13b0d92963c9b36993d1d742cdfc10c25b0f6/src/test/resources/fujitsu_ebcdic_kana_mapping.json",
+      "upstream_path": "src/test/resources/fujitsu_ebcdic_kana_mapping.json",
+      "upstream_sha256": "fbfdc4590c9747996a3dacad10409ab3bccd0d1c81e028f69957caee7a7ddc13",
+      "repository_sha256": "fbfdc4590c9747996a3dacad10409ab3bccd0d1c81e028f69957caee7a7ddc13",
+      "transform": "none; retained byte-for-byte (CodeGen separately derives static tables)"
+    },
+    {
+      "file": "fujitsu_ebcdic_lower_mapping.json",
+      "source_url": "https://raw.githubusercontent.com/hidekatsu-izuno/jef4j/40d13b0d92963c9b36993d1d742cdfc10c25b0f6/src/test/resources/fujitsu_ebcdic_lower_mapping.json",
+      "upstream_path": "src/test/resources/fujitsu_ebcdic_lower_mapping.json",
+      "upstream_sha256": "8d51e538e0611fc0b1ecaaf53e269cdab41996a0d77d1c45fbfa52659f1c7ee9",
+      "repository_sha256": "8d51e538e0611fc0b1ecaaf53e269cdab41996a0d77d1c45fbfa52659f1c7ee9",
+      "transform": "none; retained byte-for-byte (CodeGen separately derives static tables)"
+    },
+    {
+      "file": "fujitsu_jef_mapping.json",
+      "source_url": "https://raw.githubusercontent.com/hidekatsu-izuno/jef4j/40d13b0d92963c9b36993d1d742cdfc10c25b0f6/src/test/resources/fujitsu_jef_mapping.json",
+      "upstream_path": "src/test/resources/fujitsu_jef_mapping.json",
+      "upstream_sha256": "4edfaa32266a1a74f8e8fd4de2ecde3bbe4a309a9dd0db7a89cce3b749aa72dd",
+      "repository_sha256": "4edfaa32266a1a74f8e8fd4de2ecde3bbe4a309a9dd0db7a89cce3b749aa72dd",
+      "transform": "none; retained byte-for-byte (CodeGen separately derives static tables)"
+    },
+    {
+      "file": "hitachi_ebcdic_mapping.json",
+      "source_url": "https://raw.githubusercontent.com/hidekatsu-izuno/jef4j/40d13b0d92963c9b36993d1d742cdfc10c25b0f6/src/test/resources/hitachi_ebcdic_mapping.json",
+      "upstream_path": "src/test/resources/hitachi_ebcdic_mapping.json",
+      "upstream_sha256": "047c1fd9e9f3b16a2cb36dda6b9d55fbdf1ccacc88a0076e4c02d72f9ef393f9",
+      "repository_sha256": "047c1fd9e9f3b16a2cb36dda6b9d55fbdf1ccacc88a0076e4c02d72f9ef393f9",
+      "transform": "none; retained byte-for-byte (CodeGen separately derives static tables)"
+    },
+    {
+      "file": "hitachi_ebcdik_mapping.json",
+      "source_url": "https://raw.githubusercontent.com/hidekatsu-izuno/jef4j/40d13b0d92963c9b36993d1d742cdfc10c25b0f6/src/test/resources/hitachi_ebcdik_mapping.json",
+      "upstream_path": "src/test/resources/hitachi_ebcdik_mapping.json",
+      "upstream_sha256": "b7f60e5266b4477a44bb835bcf83cdb202448fbe9967fe9a5b4340aeff7d47bd",
+      "repository_sha256": "b7f60e5266b4477a44bb835bcf83cdb202448fbe9967fe9a5b4340aeff7d47bd",
+      "transform": "none; retained byte-for-byte (CodeGen separately derives static tables)"
+    },
+    {
+      "file": "hitachi_keis78_mapping.json",
+      "source_url": "https://raw.githubusercontent.com/hidekatsu-izuno/jef4j/40d13b0d92963c9b36993d1d742cdfc10c25b0f6/src/test/resources/hitachi_keis78_mapping.json",
+      "upstream_path": "src/test/resources/hitachi_keis78_mapping.json",
+      "upstream_sha256": "161e4134e8d8c47e61078064b794ddb6a5606e174c7bd2ff2f875baa0b41d6f9",
+      "repository_sha256": "161e4134e8d8c47e61078064b794ddb6a5606e174c7bd2ff2f875baa0b41d6f9",
+      "transform": "none; retained byte-for-byte (CodeGen separately derives static tables)"
+    },
+    {
+      "file": "hitachi_keis83_mapping.json",
+      "source_url": "https://raw.githubusercontent.com/hidekatsu-izuno/jef4j/40d13b0d92963c9b36993d1d742cdfc10c25b0f6/src/test/resources/hitachi_keis83_mapping.json",
+      "upstream_path": "src/test/resources/hitachi_keis83_mapping.json",
+      "upstream_sha256": "1bf35d3ab964e12f2d9009d9df605ec586633a8ea0c5c77eeca1949df2e49cc0",
+      "repository_sha256": "1bf35d3ab964e12f2d9009d9df605ec586633a8ea0c5c77eeca1949df2e49cc0",
+      "transform": "none; retained byte-for-byte (CodeGen separately derives static tables)"
+    },
+    {
+      "file": "nec_jis8_mapping.json",
+      "source_url": "https://raw.githubusercontent.com/hidekatsu-izuno/jef4j/40d13b0d92963c9b36993d1d742cdfc10c25b0f6/src/test/resources/nec_jis8_mapping.json",
+      "upstream_path": "src/test/resources/nec_jis8_mapping.json",
+      "upstream_sha256": "7f520bf36a7750eaf1b76a03eed399d5a1f124138f506727881b1bc5fc52505f",
+      "repository_sha256": "7f520bf36a7750eaf1b76a03eed399d5a1f124138f506727881b1bc5fc52505f",
+      "transform": "none; retained byte-for-byte (CodeGen separately derives static tables)"
+    },
+    {
+      "file": "nec_ebcdik_mapping.json",
+      "source_url": "https://raw.githubusercontent.com/hidekatsu-izuno/jef4j/40d13b0d92963c9b36993d1d742cdfc10c25b0f6/src/test/resources/nec_ebcdik_mapping.json",
+      "upstream_path": "src/test/resources/nec_ebcdik_mapping.json",
+      "upstream_sha256": "fa514675b866b71562cc1ab3831cc6643ef76de51a008768ec8d5f3a6b419209",
+      "repository_sha256": "fa514675b866b71562cc1ab3831cc6643ef76de51a008768ec8d5f3a6b419209",
+      "transform": "none; retained byte-for-byte (CodeGen separately derives static tables)"
+    },
+    {
+      "file": "nec_jis8_ebcdik_mapping.json",
+      "source_url": "https://raw.githubusercontent.com/hidekatsu-izuno/jef4j/40d13b0d92963c9b36993d1d742cdfc10c25b0f6/src/test/resources/nec_jis8_ebcdik_mapping.json",
+      "upstream_path": "src/test/resources/nec_jis8_ebcdik_mapping.json",
+      "upstream_sha256": "dacf8dd8c03ec4a8099cb4068bee64a60cd18e1164690630521209c96176862d",
+      "repository_sha256": "dacf8dd8c03ec4a8099cb4068bee64a60cd18e1164690630521209c96176862d",
+      "transform": "none; retained byte-for-byte (CodeGen separately derives static tables)"
+    },
+    {
+      "file": "nec_jips_mapping.json",
+      "source_url": "https://raw.githubusercontent.com/hidekatsu-izuno/jef4j/40d13b0d92963c9b36993d1d742cdfc10c25b0f6/src/test/resources/nec_jips_mapping.json",
+      "upstream_path": "src/test/resources/nec_jips_mapping.json",
+      "upstream_sha256": "86e4955485cdac1a52792b429cc5f968e27f4e801a08eee591f334dae92d3dd0",
+      "repository_sha256": "86e4955485cdac1a52792b429cc5f968e27f4e801a08eee591f334dae92d3dd0",
+      "transform": "none; retained byte-for-byte (CodeGen separately derives static tables)"
+    }
+  ]
 }
